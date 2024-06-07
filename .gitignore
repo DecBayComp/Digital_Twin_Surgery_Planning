@@ -83,6 +83,3 @@ paper_solutions/
 
 # written by setuptools_scm
 **/_version.py
-
-# data folder
-sample_datas/*
