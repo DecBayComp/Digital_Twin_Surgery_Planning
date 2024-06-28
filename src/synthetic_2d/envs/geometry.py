@@ -7,8 +7,8 @@
 from abc import ABCMeta, abstractmethod
 from typing import Dict, Any, List, Optional, Tuple
 import pygame
-from snake_ai.utils.types import Numerical
-from snake_ai.utils import Colors
+from synthetic_2d.utils.types import Numerical
+from synthetic_2d.utils import Colors
 import numpy as np
 
 
@@ -26,7 +26,9 @@ class Geometry(metaclass=ABCMeta):
 
     def _check_is_numerical(self, value: Any, name: str):
         if not isinstance(value, (float, int)):
-            raise TypeError(f"Expected float or int value for {name}, get {value}")
+            raise TypeError(
+                f"Expected float or int value for {name}, get {value}"
+            )
 
 
 class Rectangle(pygame.Rect, Geometry):
@@ -39,7 +41,9 @@ class Rectangle(pygame.Rect, Geometry):
         }
 
     def to_circle(self):
-        return Circle(self.centerx, self.centery, min(self.height, self.width) / 2)
+        return Circle(
+            self.centerx, self.centery, min(self.height, self.width) / 2
+        )
 
     def draw(self, canvas: pygame.Surface, color: Colors = Colors.RED):
         pygame.draw.rect(canvas, color.value, self)
@@ -62,7 +66,8 @@ class Rectangle(pygame.Rect, Geometry):
     @property
     def center(self):
         return np.array(
-            [self.x + 0.5 * self.width, self.y + 0.5 * self.height], dtype=float
+            [self.x + 0.5 * self.width, self.y + 0.5 * self.height],
+            dtype=float,
         )
 
     @property
@@ -75,7 +80,9 @@ class Rectangle(pygame.Rect, Geometry):
 
 
 class Circle(Geometry):
-    def __init__(self, x_init: Numerical, y_init: Numerical, radius: Numerical) -> None:
+    def __init__(
+        self, x_init: Numerical, y_init: Numerical, radius: Numerical
+    ) -> None:
         self.center = np.array([x_init, y_init], dtype=float)
 
         if radius <= 0:
@@ -106,7 +113,9 @@ class Circle(Geometry):
                 return True
         return False
 
-    def draw(self, canvas: pygame.Surface, color: Colors = Colors.MIDDLE_GREEN):
+    def draw(
+        self, canvas: pygame.Surface, color: Colors = Colors.MIDDLE_GREEN
+    ):
         pygame.draw.circle(canvas, color.value, self.center, self.radius)
 
     def to_dict(self) -> Dict:
@@ -117,7 +126,9 @@ class Circle(Geometry):
         }
 
     def to_rectangle(self) -> Rectangle:
-        return Rectangle(*(self.center - self.radius), self.diameter, self.diameter)
+        return Rectangle(
+            *(self.center - self.radius), self.diameter, self.diameter
+        )
 
     @property
     def diameter(self):
@@ -130,7 +141,11 @@ class Circle(Geometry):
             raise KeyError(
                 f"Input dictonary need to contain the following keys : 'x_center', 'y_center','radius'. Get {dictionary.keys()}"
             )
-        return cls(dictionary["x_center"], dictionary["y_center"], dictionary["radius"])
+        return cls(
+            dictionary["x_center"],
+            dictionary["y_center"],
+            dictionary["radius"],
+        )
 
     ## Private methods
     def _collide_rect(self, rect: Rectangle) -> bool:
@@ -159,20 +174,34 @@ class Circle(Geometry):
         assert isinstance(
             sphere, Circle
         ), f"Expected to check collision with a sphere, not {type(sphere)}"
-        return np.linalg.norm(self.center - sphere.center) < self.radius + sphere.radius
+        return (
+            np.linalg.norm(self.center - sphere.center)
+            < self.radius + sphere.radius
+        )
 
     ## Dunder methods
     def __repr__(self) -> str:
         return f"{__class__.__name__}({self.center[0]!r},{self.center[1]!r}, {self.radius!r})"
 
     def __eq__(self, other: object) -> bool:
-        assert isinstance(other, Circle), f"Can not compare circle with {type(other)}."
-        return np.array_equal(self.center, other.center) and self.radius == other.radius
+        assert isinstance(
+            other, Circle
+        ), f"Can not compare circle with {type(other)}."
+        return (
+            np.array_equal(self.center, other.center)
+            and self.radius == other.radius
+        )
 
 
 class Cube(Geometry):
     def __init__(
-        self, x: int, y: int, z: int, width: int = 1, height: int = 1, depth: int = 1
+        self,
+        x: int,
+        y: int,
+        z: int,
+        width: int = 1,
+        height: int = 1,
+        depth: int = 1,
     ) -> None:
         assert (
             isinstance(x, (int, np.int_))
@@ -204,7 +233,9 @@ class Cube(Geometry):
         return super().from_dict(dictionary)
 
     def is_inside(self, other: Geometry) -> bool:
-        assert isinstance(other, Cube), f"Can not compare cube with {type(other)}."
+        assert isinstance(
+            other, Cube
+        ), f"Can not compare cube with {type(other)}."
         return (
             (self.x >= other.x)
             and (self.y >= other.y)
@@ -215,7 +246,9 @@ class Cube(Geometry):
         )
 
     def contains(self, other: Geometry) -> bool:
-        assert isinstance(other, Cube), f"Can not compare cube with {type(other)}."
+        assert isinstance(
+            other, Cube
+        ), f"Can not compare cube with {type(other)}."
         return other.is_inside(self)
 
     @property
@@ -260,7 +293,11 @@ class Cube(Geometry):
                 (self.x + self.width, self.y + self.height, self.z),
                 (self.x + self.width, self.y, self.z + self.depth),
                 (self.x, self.y + self.height, self.z + self.depth),
-                (self.x + self.width, self.y + self.height, self.z + self.depth),
+                (
+                    self.x + self.width,
+                    self.y + self.height,
+                    self.z + self.depth,
+                ),
             ]
         )
 

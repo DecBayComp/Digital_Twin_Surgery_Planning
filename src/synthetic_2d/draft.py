@@ -1,20 +1,28 @@
 import numpy as np
-from snake_ai.diffsim.boxes import Box2D, Box3D
-from snake_ai.diffsim.field import ScalarField, VectorField, spatial_gradient, log
+from synthetic_2d.diffsim.boxes import Box2D, Box3D
+from synthetic_2d.diffsim.field import (
+    ScalarField,
+    VectorField,
+    spatial_gradient,
+    log,
+)
 import taichi as ti
 import matplotlib.pyplot as plt
 from pathlib import Path
 from matplotlib import animation
 from phi import flow
-from snake_ai.diffsim.boxes import convert_cube
-from snake_ai.envs.converter import GridWorld3D
-from snake_ai.phiflow.simulation_3d import *
-from snake_ai.diffsim.walk_simulation import WalkerSimulationStoch3D
-from snake_ai.phiflow.converter import PointCloudConverter
+from synthetic_2d.diffsim.boxes import convert_cube
+from synthetic_2d.envs.converter import GridWorld3D
+from synthetic_2d.phiflow.simulation_3d import *
+from synthetic_2d.diffsim.walk_simulation import WalkerSimulationStoch3D
+from synthetic_2d.phiflow.converter import PointCloudConverter
 import scipy.sparse.linalg as spl
 import taichi as ti
 
-from snake_ai.envs.random_obstacles_3d import RandomObstacles3D, GridWorld3D
+from synthetic_2d.envs.random_obstacles_3d import (
+    RandomObstacles3D,
+    GridWorld3D,
+)
 import scipy.sparse as sp
 
 
@@ -26,7 +34,9 @@ def test_chat_gpt():
     # Generate example 3D time series data
     np.random.seed(42)
     num_points = 100
-    time_values = pd.date_range(start="2023-01-01", periods=num_points, freq="D")
+    time_values = pd.date_range(
+        start="2023-01-01", periods=num_points, freq="D"
+    )
     x_values = np.random.rand(num_points)
     y_values = np.random.rand(num_points)
     z_values = np.linspace(0, 1, num_points)
@@ -114,7 +124,9 @@ def test_chat_gpt():
     # Generate example 3D time series data
     np.random.seed(42)
     num_points = 100
-    time_values = pd.date_range(start="2023-01-01", periods=num_points, freq="D")
+    time_values = pd.date_range(
+        start="2023-01-01", periods=num_points, freq="D"
+    )
     x_values = np.random.rand(num_points)
     y_values = np.random.rand(num_points)
     z_values = np.linspace(0, 1, num_points)
@@ -152,8 +164,12 @@ def test_chat_gpt():
 
 def create_gradient_matrix_2d(nx, ny, dx, dy) -> Tuple[sp.lil_array]:
     # Create 1D finite difference matrices for x and y directions (centered differences)
-    Dx = sp.diags([-1, 0, 1], [-1, 0, 1], shape=(nx, nx), format="csc") / (2 * dx)
-    Dy = sp.diags([-1, 0, 1], [-1, 0, 1], shape=(ny, ny), format="csc") / (2 * dy)
+    Dx = sp.diags([-1, 0, 1], [-1, 0, 1], shape=(nx, nx), format="csc") / (
+        2 * dx
+    )
+    Dy = sp.diags([-1, 0, 1], [-1, 0, 1], shape=(ny, ny), format="csc") / (
+        2 * dy
+    )
     # Apply the boundary conditions
     Dx[0, 0] = -1 / dx
     Dx[0, 1] = 1 / dx
@@ -173,9 +189,15 @@ def create_gradient_matrix_2d(nx, ny, dx, dy) -> Tuple[sp.lil_array]:
 
 def create_gradient_matrix_3d(nx, ny, nz, dx, dy, dz) -> Tuple[sp.lil_array]:
     # Create 1D finite difference matrices for x and y directions (centered differences)
-    Dx = sp.diags([-1, 0, 1], [-1, 0, 1], shape=(nx, nx), format="csc") / (2 * dx)
-    Dy = sp.diags([-1, 0, 1], [-1, 0, 1], shape=(ny, ny), format="csc") / (2 * dy)
-    Dz = sp.diags([-1, 0, 1], [-1, 0, 1], shape=(nz, nz), format="csc") / (2 * dz)
+    Dx = sp.diags([-1, 0, 1], [-1, 0, 1], shape=(nx, nx), format="csc") / (
+        2 * dx
+    )
+    Dy = sp.diags([-1, 0, 1], [-1, 0, 1], shape=(ny, ny), format="csc") / (
+        2 * dy
+    )
+    Dz = sp.diags([-1, 0, 1], [-1, 0, 1], shape=(nz, nz), format="csc") / (
+        2 * dz
+    )
     # Apply the boundary conditions
     Dx[0, 0] = -1 / dx
     Dx[0, 1] = 1 / dx
@@ -209,7 +231,9 @@ def create_div_matrix_3d(nx, ny, nz, dx, dy, dz) -> sp.lil_matrix:
     return sp.hstack((Gx, Gy, Gz))
 
 
-def create_laplacian_matrix_2d(nx: int, ny: int, dx: float, dy: float) -> sp.lil_array:
+def create_laplacian_matrix_2d(
+    nx: int, ny: int, dx: float, dy: float
+) -> sp.lil_array:
     Dxx = sp.diags([1, -2, 1], [-1, 0, 1], shape=(nx, nx)) / dx**2
     Dyy = sp.diags([1, -2, 1], [-1, 0, 1], shape=(ny, ny)) / dy**2
     return sp.lil_array(sp.kronsum(Dyy, Dxx))
@@ -234,7 +258,9 @@ def get_laplacian(obstacle_map: np.ndarray) -> Tuple[sp.spmatrix, np.ndarray]:
     if obstacle_map.ndim == 2:
         laplace = create_laplacian_matrix_2d(*obstacle_map.shape, 1.0, 1.0)
     elif obstacle_map.ndim == 3:
-        laplace = create_laplacian_matrix_3d(*obstacle_map.shape, 1.0, 1.0, 1.0)
+        laplace = create_laplacian_matrix_3d(
+            *obstacle_map.shape, 1.0, 1.0, 1.0
+        )
     else:
         raise ValueError("Obstacle map must be 2D or 3D")
     # Keep only the free space in the laplacian
@@ -263,12 +289,16 @@ def solve_log_concentration(
 
     # Create the laplacian and gradient matrices
     laplace = create_laplacian_matrix_2d(nx, ny, dx, dy)  # NxN
-    laplace = sp.csc_array(laplace[:, non_zero_ind][non_zero_ind, :])  # (N-k)x(N-k)
+    laplace = sp.csc_array(
+        laplace[:, non_zero_ind][non_zero_ind, :]
+    )  # (N-k)x(N-k)
     Gx, Gy = create_gradient_matrix_2d(nx, ny, dx, dy)
     Gx = Gx[:, non_zero_ind][non_zero_ind, :]  # (N-k)x(N-k)
     Gy = Gy[:, non_zero_ind][non_zero_ind, :]  # (N-k)x(N-k)
 
-    gradient = sp.csc_array(sp.vstack((Gx, Gy), format="csc"))  # 2(N-k) x (N-k)
+    gradient = sp.csc_array(
+        sp.vstack((Gx, Gy), format="csc")
+    )  # 2(N-k) x (N-k)
     eye_2D = sp.csc_array(
         sp.hstack((sp.eye(nb_free_cells), sp.eye(nb_free_cells)), format="csc")
     )  # (N-k) x 2(N-k)
@@ -371,7 +401,8 @@ def example_2D(random=False):
         (
             -div
             @ np.concatenate(
-                (grad_x @ solution.flatten(), grad_y @ solution.flatten()), axis=0
+                (grad_x @ solution.flatten(), grad_y @ solution.flatten()),
+                axis=0,
             ).flatten()
         ).reshape(init_shape)
     )
@@ -381,7 +412,9 @@ def example_2D(random=False):
 
 def example_3D(slice_ind=10, random=False):
     if random:
-        obstacle_map = np.random.choice([0, 1], size=(20, 20, 20), p=[0.7, 0.3])
+        obstacle_map = np.random.choice(
+            [0, 1], size=(20, 20, 20), p=[0.7, 0.3]
+        )
     else:
         obstacle_map = np.zeros((20, 20, 20))
     init_shape = obstacle_map.shape

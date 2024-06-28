@@ -1,12 +1,12 @@
 import argparse
-from snake_ai.envs.grid_world import GridWorld
-from snake_ai.envs.walker import Walker2D
-from snake_ai.envs.geometry import Rectangle
+from synthetic_2d.envs.grid_world import GridWorld
+from synthetic_2d.envs.walker import Walker2D
+from synthetic_2d.envs.geometry import Rectangle
 import pygame
 
 import numpy as np
 
-from snake_ai.utils import errors
+from synthetic_2d.utils import errors
 from typing import List, Optional, Tuple, Dict, Any
 
 
@@ -56,7 +56,9 @@ class RandomObstaclesEnv(GridWorld):
         )
 
     ## Public methods
-    def reset(self, seed: Optional[int] = None) -> Tuple[np.ndarray, Dict[str, Any]]:
+    def reset(
+        self, seed: Optional[int] = None
+    ) -> Tuple[np.ndarray, Dict[str, Any]]:
         """Method to reset the environment
 
         Args:
@@ -154,7 +156,10 @@ class RandomObstaclesEnv(GridWorld):
         for x, y in available_positions:
             if self._free_position_mask[x : x + size, y : y + size].all():
                 return Rectangle(
-                    x * self.pixel, y * self.pixel, size * self.pixel, size * self.pixel
+                    x * self.pixel,
+                    y * self.pixel,
+                    size * self.pixel,
+                    size * self.pixel,
                 )
         raise errors.ConfigurationError(
             f"Unable to place obstacle of size {size} in the environment. Reduce nb_obs or max_obs_size."

@@ -2,13 +2,14 @@ import numpy as np
 import taichi as ti
 import taichi.math as tm
 
-from snake_ai.envs.geometry import Rectangle, Cube
+from synthetic_2d.envs.geometry import Rectangle, Cube
 from typing import List
 
 
 def convert_rectangle(rect: Rectangle):
     return Box2D(
-        tm.vec2(rect.x, rect.y), tm.vec2(rect.x + rect.width, rect.y + rect.height)
+        tm.vec2(rect.x, rect.y),
+        tm.vec2(rect.x + rect.width, rect.y + rect.height),
     )
 
 
@@ -91,7 +92,9 @@ class Box3D:
     def contains(self, pos: ti.math.vec3) -> bool:
         clamped_pos = tm.clamp(pos, self.min, self.max)
         return (
-            clamped_pos.x == pos.x and clamped_pos.y == pos.y and clamped_pos.z == pos.z
+            clamped_pos.x == pos.x
+            and clamped_pos.y == pos.y
+            and clamped_pos.z == pos.z
         )
 
 

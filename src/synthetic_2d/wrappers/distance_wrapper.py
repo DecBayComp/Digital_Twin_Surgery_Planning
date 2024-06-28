@@ -8,7 +8,7 @@ from collections import OrderedDict
 from typing import Optional, Union
 import gym
 import gym.spaces
-from snake_ai.envs.snake_base_env import SnakeBaseEnv
+from synthetic_2d.envs.snake_base_env import SnakeBaseEnv
 import numpy as np
 
 
@@ -52,7 +52,9 @@ class DistanceWrapper(gym.ObservationWrapper):
         if isinstance(self.observation_space, gym.spaces.Dict):
             return OrderedDict(
                 {
-                    "observation": np.linalg.norm(observation["observation"], axis=1)
+                    "observation": np.linalg.norm(
+                        observation["observation"], axis=1
+                    )
                     / self.norm,
                     "achieved_goal": observation["achieved_goal"],
                     "desired_goal": observation["desired_goal"],

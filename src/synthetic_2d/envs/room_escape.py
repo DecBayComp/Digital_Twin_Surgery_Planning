@@ -4,11 +4,11 @@
 # @desc Created on 2023-04-04 11:03:10 am
 # @copyright MIT License
 #
-from snake_ai.envs.grid_world import GridWorld
-from snake_ai.envs.geometry import Rectangle
-from snake_ai.envs.walker import Walker2D
+from synthetic_2d.envs.grid_world import GridWorld
+from synthetic_2d.envs.geometry import Rectangle
+from synthetic_2d.envs.walker import Walker2D
 from typing import Optional, Tuple, Dict, Any, List
-from snake_ai.utils import errors
+from synthetic_2d.utils import errors
 import numpy as np
 import pygame
 
@@ -31,7 +31,9 @@ class RoomEscape(GridWorld):
         # All non-instanciated attributes
         self._rooms = None
 
-    def reset(self, seed: Optional[int] = None) -> Tuple[np.ndarray, Dict[str, Any]]:
+    def reset(
+        self, seed: Optional[int] = None
+    ) -> Tuple[np.ndarray, Dict[str, Any]]:
         super().reset(seed)
         self._populate_grid_with_obstacles()
         x_agent, y_agent = self._rng.choice(self.free_positions)
@@ -95,14 +97,18 @@ class RoomEscape(GridWorld):
             if x == hole_x_1 or x == hole_x_2:
                 continue
             self._obstacles.append(
-                Rectangle(x * self.pixel, y_0 * self.pixel, self.pixel, self.pixel)
+                Rectangle(
+                    x * self.pixel, y_0 * self.pixel, self.pixel, self.pixel
+                )
             )
         # Construct vertical walls
         for y in range(self.height):
             if y == hole_y_1 or y == hole_y_2:
                 continue
             self._obstacles.append(
-                Rectangle(x_0 * self.pixel, y * self.pixel, self.pixel, self.pixel)
+                Rectangle(
+                    x_0 * self.pixel, y * self.pixel, self.pixel, self.pixel
+                )
             )
 
 

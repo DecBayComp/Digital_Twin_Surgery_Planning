@@ -1,6 +1,6 @@
 import numpy as np
 
-from napari_potential_field_navigation._widget import (
+from napari_navigation_field._widget import (
     ExampleQWidget,
     ImageThreshold,
     threshold_autogenerate_widget,

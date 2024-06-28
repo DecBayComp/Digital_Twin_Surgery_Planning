@@ -4,10 +4,16 @@ import matplotlib.pyplot as plt
 from matplotlib import animation
 
 # project import
-from snake_ai.envs import GridWorld, RandomObstaclesEnv, MazeGrid, SlotEnv, RoomEscape
-from snake_ai.phiflow import DiffusionSimulation, maths, autodiff
-from snake_ai.utils.io import SimulationLoader, SimulationWritter
-import snake_ai.phiflow.visualization as vis
+from synthetic_2d.envs import (
+    GridWorld,
+    RandomObstaclesEnv,
+    MazeGrid,
+    SlotEnv,
+    RoomEscape,
+)
+from synthetic_2d.phiflow import DiffusionSimulation, maths, autodiff
+from synthetic_2d.utils.io import SimulationLoader, SimulationWritter
+import synthetic_2d.phiflow.visualization as vis
 
 # general import
 from pathlib import Path
@@ -37,7 +43,10 @@ def environment_parser() -> argparse.ArgumentParser:
         "--height", type=int, default=20, help="Height of the environment"
     )
     env_parser.add_argument(
-        "--pixel", type=int, default=10, help="Size of a game pixel in pixel unit"
+        "--pixel",
+        type=int,
+        default=10,
+        help="Size of a game pixel in pixel unit",
     )
     env_parser.add_argument(
         "--seed", type=int, default=0, help="Seed for the simulation PRNG"
@@ -75,7 +84,11 @@ def simulation_parser() -> argparse.ArgumentParser:
         add_help=False, formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     diffusion_parser.add_argument(
-        "-D", "--diff_coef", type=float, default=1, help="Diffusion coefficient"
+        "-D",
+        "--diff_coef",
+        type=float,
+        default=1,
+        help="Diffusion coefficient",
     )
     diffusion_parser.add_argument(
         "-T",
@@ -121,10 +134,18 @@ def walker_parser() -> argparse.ArgumentParser:
     )
 
     walk_parser.add_argument(
-        "-p", "--path", type=str, required=True, help="Path to the simulation directory"
+        "-p",
+        "--path",
+        type=str,
+        required=True,
+        help="Path to the simulation directory",
     )
     walk_parser.add_argument(
-        "-t", "--t_max", type=int, default=100, help="Maximum time for the simulation"
+        "-t",
+        "--t_max",
+        type=int,
+        default=100,
+        help="Maximum time for the simulation",
     )
     walk_parser.add_argument(
         "--dt", type=float, default=1, help="Time step for the simulation"
@@ -167,7 +188,10 @@ def simulate_diffusion():
 def diffuse(args: argparse.Namespace):
     if args.name == "grid_world":
         env = GridWorld(
-            width=args.width, height=args.height, pixel=args.pixel, seed=args.seed
+            width=args.width,
+            height=args.height,
+            pixel=args.pixel,
+            seed=args.seed,
         )
     elif args.name == "rand_obs":
         env = RandomObstaclesEnv(
@@ -188,11 +212,17 @@ def diffuse(args: argparse.Namespace):
         )
     elif args.name == "slot":
         env = SlotEnv(
-            width=args.width, height=args.height, pixel=args.pixel, seed=args.seed
+            width=args.width,
+            height=args.height,
+            pixel=args.pixel,
+            seed=args.seed,
         )
     elif args.name == "rooms":
         env = RoomEscape(
-            width=args.width, height=args.height, pixel=args.pixel, seed=args.seed
+            width=args.width,
+            height=args.height,
+            pixel=args.pixel,
+            seed=args.seed,
         )
     else:
         raise ValueError(
@@ -228,8 +258,12 @@ def diffuse(args: argparse.Namespace):
 
     # Visualize the initial configuration of walkers
     concentration = simulation.field
-    log_concentration = maths.compute_log_concentration(concentration, epsilon=1e-6)
-    force_field = flow.field.spatial_gradient(log_concentration, type=flow.CenteredGrid)
+    log_concentration = maths.compute_log_concentration(
+        concentration, epsilon=1e-6
+    )
+    force_field = flow.field.spatial_gradient(
+        log_concentration, type=flow.CenteredGrid
+    )
     pt_cloud = simulation.point_cloud
     fig, _, _ = vis.plot_walkers_with_concentration(
         pt_cloud, log_concentration, force_field=force_field
@@ -251,8 +285,12 @@ def walk(args: argparse.Namespace):
     simulation = loader.load()
 
     concentration = simulation.field
-    log_concentration = maths.compute_log_concentration(concentration, epsilon=args.eps)
-    force_field = flow.field.spatial_gradient(log_concentration, type=flow.CenteredGrid)
+    log_concentration = maths.compute_log_concentration(
+        concentration, epsilon=args.eps
+    )
+    force_field = flow.field.spatial_gradient(
+        log_concentration, type=flow.CenteredGrid
+    )
     force_field = maths.clip_gradient_norm(force_field, threashold=1)
 
     tic = time.perf_counter()
@@ -274,9 +312,7 @@ def walk(args: argparse.Namespace):
     print(f"Simulation time : {toc -tic} s")
 
     walker_type = "stochastic" if args.diffusivity else "deterministic"
-    animation_name = (
-        f"{walker_type}_walkers_Tmax={args.t_max}_dt={args.dt}_D={args.diffusivity}.gif"
-    )
+    animation_name = f"{walker_type}_walkers_Tmax={args.t_max}_dt={args.dt}_D={args.diffusivity}.gif"
 
     vis.animate_walk_history(
         trajectories,
@@ -294,7 +330,10 @@ def autodiff_simulation():
         description="Walker simulation optimization loop using autodiff",
     )
     autodiff_parser.add_argument(
-        "--lr", type=float, default=1e-2, help="Learning rate for the gradient descent"
+        "--lr",
+        type=float,
+        default=1e-2,
+        help="Learning rate for the gradient descent",
     )
     autodiff_parser.add_argument(
         "--max_epoch",
@@ -303,14 +342,17 @@ def autodiff_simulation():
         help="Maximum number of epoch for the gradient descent",
     )
     autodiff_parser.add_argument(
-        "--gradient_clip", type=float, default=1, help="Maximum norm of the gradient"
+        "--gradient_clip",
+        type=float,
+        default=1,
+        help="Maximum norm of the gradient",
     )
     args = autodiff_parser.parse_args()
     autodiff_sim(args)
 
 
 def autodiff_sim(args: argparse.Namespace):
-    from snake_ai.phiflow import converter
+    from synthetic_2d.phiflow import converter
 
     path = Path(args.path).resolve(strict=True)
 
@@ -318,8 +360,12 @@ def autodiff_sim(args: argparse.Namespace):
     simulation = loader.load()
 
     concentration = simulation.field
-    log_concentration = maths.compute_log_concentration(concentration, epsilon=args.eps)
-    force_field = flow.field.spatial_gradient(log_concentration, type=flow.CenteredGrid)
+    log_concentration = maths.compute_log_concentration(
+        concentration, epsilon=args.eps
+    )
+    force_field = flow.field.spatial_gradient(
+        log_concentration, type=flow.CenteredGrid
+    )
 
     target = converter.convert_position_to_point(
         simulation.env.goal, simulation.env.pixel

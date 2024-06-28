@@ -1,6 +1,6 @@
-from snake_ai.envs.agent import Agent
-from snake_ai.envs.geometry import Rectangle
-from snake_ai.utils import Direction, Colors, errors
+from synthetic_2d.envs.agent import Agent
+from synthetic_2d.envs.geometry import Rectangle
+from synthetic_2d.utils import Direction, Colors, errors
 from typing import List
 import pygame
 
@@ -8,7 +8,9 @@ import pygame
 class Walker2D(Agent):
     def __init__(self, x: int, y: int, pixel: int) -> None:
         if pixel < 1:
-            raise ValueError(f"Pixel argument can not be lower that 1. Get {pixel}")
+            raise ValueError(
+                f"Pixel argument can not be lower that 1. Get {pixel}"
+            )
         self.pixel = int(pixel)
         self._position = Rectangle(
             x * self.pixel, y * self.pixel, self.pixel, self.pixel
@@ -61,8 +63,13 @@ class Walker2D(Agent):
     ## Dunder methods
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Walker2D):
-            raise TypeError(f"Can not compare instance of Walker2D with {type(other)}")
-        return self.direction == other.direction and self.position == other.position
+            raise TypeError(
+                f"Can not compare instance of Walker2D with {type(other)}"
+            )
+        return (
+            self.direction == other.direction
+            and self.position == other.position
+        )
 
     def __repr__(self) -> str:
         return f"{__class__.__name__}(position={self.position!r}, direction={self.direction}, pixel={self.pixel})"

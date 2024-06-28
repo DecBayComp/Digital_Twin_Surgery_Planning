@@ -4,10 +4,10 @@
 # @desc Created on 2023-06-24 10:07:34 am
 # @copyright MIT License
 #
-from snake_ai.envs import RoomEscape, SlotEnv, RandomObstaclesEnv
-from snake_ai.phiflow.simulation import Simulation
-from snake_ai.phiflow import maths
-from snake_ai.utils.io import SimulationWritter, SimulationLoader
+from synthetic_2d.envs import RoomEscape, SlotEnv, RandomObstaclesEnv
+from synthetic_2d.phiflow.simulation import Simulation
+from synthetic_2d.phiflow import maths
+from synthetic_2d.utils.io import SimulationWritter, SimulationLoader
 from phi.jax import flow
 from pathlib import Path
 import matplotlib.pyplot as plt
@@ -113,7 +113,9 @@ def trajectory_optimization(
     if gradient_clip is None:
         force_field = initial_field
     else:
-        force_field = maths.clip_gradient_norm(initial_field, threashold=gradient_clip)
+        force_field = maths.clip_gradient_norm(
+            initial_field, threashold=gradient_clip
+        )
 
     # diff_simulation = flow.functional_gradient(simulation, wrt="force_field")
 
@@ -129,7 +131,9 @@ def trajectory_optimization(
             nb_iter=nb_iter,
             diffusivity=diffusivity,
         )
-        return flow.math.mean(maths.normalized_l2_distance(trajectories, target))
+        return flow.math.mean(
+            maths.normalized_l2_distance(trajectories, target)
+        )
 
     loss = []
     best_loss = np.inf
@@ -157,17 +161,23 @@ def trajectory_optimization(
 
 
 def main(simulation_path: Union[str, Path]):
-    import snake_ai.phiflow.visualization as vis
+    import synthetic_2d.phiflow.visualization as vis
     import time
 
     loader = SimulationLoader(simulation_path)
     simu = loader.load()
 
     concentration = simu.field
-    log_concentration = maths.compute_log_concentration(concentration, epsilon=1e-6)
-    force_field = flow.field.spatial_gradient(log_concentration, type=flow.CenteredGrid)
+    log_concentration = maths.compute_log_concentration(
+        concentration, epsilon=1e-6
+    )
+    force_field = flow.field.spatial_gradient(
+        log_concentration, type=flow.CenteredGrid
+    )
     force_field = maths.clip_gradient_norm(force_field, threashold=1)
-    masked_values = flow.math.where(simu.obstacles.values, 0, force_field.values)
+    masked_values = flow.math.where(
+        simu.obstacles.values, 0, force_field.values
+    )
     force_field = force_field.with_values(masked_values)
     # Plot the concentration field and the walkers inital state
     pt_cloud = simu.point_cloud
@@ -179,7 +189,9 @@ def main(simulation_path: Union[str, Path]):
     # history = stochastic_walk_simulation(pt_cloud, force_field, dt=1, nb_iter=10)
     obstacles = simu.obstacles
     # print(history * obstacles)
-    target = flow.geom.Point(flow.vec(x=simu.env.goal.centerx, y=simu.env.goal.centery))
+    target = flow.geom.Point(
+        flow.vec(x=simu.env.goal.centerx, y=simu.env.goal.centery)
+    )
 
     tic = time.perf_counter()
     trajectory_optimization(

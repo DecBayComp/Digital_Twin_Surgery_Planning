@@ -6,11 +6,11 @@
 #
 import gymnasium as gym
 import pygame
-from snake_ai.envs.snake import Snake, SnakeHuman, BidirectionalSnake
-from snake_ai.envs.random_obstacles_env import RandomObstaclesEnv
-from snake_ai.envs.grid_world import GridWorld
-from snake_ai.utils import Reward, Direction
-from snake_ai.utils.errors import ConfigurationError, InitialisationError
+from synthetic_2d.envs.snake import Snake, SnakeHuman, BidirectionalSnake
+from synthetic_2d.envs.random_obstacles_env import RandomObstaclesEnv
+from synthetic_2d.envs.grid_world import GridWorld
+from synthetic_2d.utils import Reward, Direction
+from synthetic_2d.utils.errors import ConfigurationError, InitialisationError
 from typing import Optional, Tuple, Dict, List
 import numpy as np
 
@@ -28,7 +28,9 @@ class SnakeEnv(RandomObstaclesEnv):
         snake_type: str = "classic",
         **kwargs,
     ):
-        super().__init__(width, height, pixel, nb_obs, max_obs_size, seed, render_mode)
+        super().__init__(
+            width, height, pixel, nb_obs, max_obs_size, seed, render_mode
+        )
         if not snake_type.lower() in ["classic", "bidirectional", "human"]:
             raise ValueError(
                 f"Snake type must be either 'classic', 'bidirectional' or 'human'. Get {snake_type}"
@@ -77,7 +79,8 @@ class SnakeEnv(RandomObstaclesEnv):
                 "The position is not initialised. Reset the environment first !"
             )
         neighbour_collisions = [
-            self._is_collision(neighbour) for neighbour in self.snake.neighbours
+            self._is_collision(neighbour)
+            for neighbour in self.snake.neighbours
         ]
 
         return np.array(
@@ -159,14 +162,18 @@ class SnakeEnv(RandomObstaclesEnv):
         )
 
     # Collision handling
-    def _collide_with_snake_body(self, rect: Optional[pygame.Rect] = None) -> bool:
+    def _collide_with_snake_body(
+        self, rect: Optional[pygame.Rect] = None
+    ) -> bool:
         if rect is None:
             return self.snake.collide_with_itself()
         return rect.collidelist(self.snake.body) != -1
 
     def _is_collision(self, rect: Optional[pygame.Rect] = None) -> bool:
         if isinstance(self.agent, Snake):
-            return super()._is_collision(rect) or self._collide_with_snake_body(rect)
+            return super()._is_collision(
+                rect
+            ) or self._collide_with_snake_body(rect)
         return super()._is_collision(rect)
 
     ## Dunder methods
@@ -179,7 +186,12 @@ class SnakeEnv(RandomObstaclesEnv):
 
 if __name__ == "__main__":
     snake_env = SnakeEnv(
-        20, 20, nb_obs=10, max_obs_size=5, render_mode="human", snake_type="human"
+        20,
+        20,
+        nb_obs=10,
+        max_obs_size=5,
+        render_mode="human",
+        snake_type="human",
     )
     seed = 0
     snake_env.reset(seed)

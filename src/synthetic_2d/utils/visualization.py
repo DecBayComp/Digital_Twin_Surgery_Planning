@@ -3,9 +3,9 @@ import matplotlib.animation as animation
 import plotly.graph_objects as go
 import numpy as np
 
-from snake_ai.envs import GridWorld
-from snake_ai.envs.geometry import Cube, Rectangle
-from snake_ai.diffsim.field import (
+from synthetic_2d.envs import GridWorld
+from synthetic_2d.envs.geometry import Cube, Rectangle
+from synthetic_2d.diffsim.field import (
     SampledField,
     ScalarField,
     VectorField,
@@ -24,7 +24,9 @@ class Visualizer:
         title: str = "Concentration map",
         add_quiver: bool = False,
     ):
-        assert isinstance(concentration, ScalarField), "Expected a scalar field"
+        assert isinstance(
+            concentration, ScalarField
+        ), "Expected a scalar field"
         fig, ax = plt.subplots(1, 1, dpi=300)
 
         im = ax.imshow(
@@ -101,7 +103,9 @@ def plot_concentration_map(
     ), "If given, force field must be a 3D numpy array"
     ## Spatial informations
     if bound_limits is not None:
-        assert len(bound_limits) == 2, "Bound limits must be a tuple of length 2"
+        assert (
+            len(bound_limits) == 2
+        ), "Bound limits must be a tuple of length 2"
         X, Y = np.meshgrid(
             np.linspace(0, bound_limits[0], field_values.shape[0]),
             np.linspace(0, bound_limits[1], field_values.shape[1]),
@@ -161,7 +165,8 @@ def plot_walkers(
         isinstance(positions, np.ndarray) and positions.ndim == 2
     ), "Positions must be a collection of 2D numpy array"
     assert force_field is None or (
-        isinstance(force_field, np.ndarray) and force_field.shape == positions.shape
+        isinstance(force_field, np.ndarray)
+        and force_field.shape == positions.shape
     ), "If given, force field must be a collection of 2D numpy array"
     # Create colormaps
     colormap = plt.get_cmap(cmap_walkers)
@@ -195,11 +200,20 @@ def plot_walkers(
         assert isinstance(target, np.ndarray) and target.shape == (
             2,
         ), "Expected target to be a 2D vector"
-        ax.plot(*target, color="green", marker="x", markersize=5, ls="", label="Target")
+        ax.plot(
+            *target,
+            color="green",
+            marker="x",
+            markersize=5,
+            ls="",
+            label="Target",
+        )
         fig.legend()
 
     # Plot the walkers with appropriate colors
-    scatter = ax.scatter(positions[:, 0], positions[:, 1], c=cloud_colors, s=10)
+    scatter = ax.scatter(
+        positions[:, 0], positions[:, 1], c=cloud_colors, s=10
+    )
     return fig, ax, scatter
 
 
@@ -240,7 +254,9 @@ def animate_walk_history(
         ax.set_title(f"{title} - t={frame * time_step}")
         scatter.set_offsets(trajectories[:, frame])
 
-    anim = animation.FuncAnimation(fig, update, frames=range(t_max), interval=200)
+    anim = animation.FuncAnimation(
+        fig, update, frames=range(t_max), interval=200
+    )
 
     if output_path is None:
         return anim
@@ -303,7 +319,11 @@ def animate_volume(
             z = frame
         # z = frame % z_max
         # ax.clear()
-        ax.set(xlabel=labels[1], ylabel=labels[2], title=f"{title} - {labels[0]}={z}")
+        ax.set(
+            xlabel=labels[1],
+            ylabel=labels[2],
+            title=f"{title} - {labels[0]}={z}",
+        )
         im.set_data(concentration[z])
 
         # ax.imshow(concentration[z], cmap="inferno", vmax=vmax, vmin=vmin)
@@ -315,7 +335,9 @@ def animate_volume(
         #     scale=1,
         # )
 
-    return animation.FuncAnimation(fig, update, frames=range(2 * z_max), interval=200)
+    return animation.FuncAnimation(
+        fig, update, frames=range(2 * z_max), interval=200
+    )
 
 
 def plot_2D_trajectory(
@@ -357,7 +379,9 @@ def plot_2D_trajectory(
             scale=scale,
         )
     for i in range(positions.shape[0]):
-        ax.plot(positions[i, :, 0], positions[i, :, 1], color=colors[i], marker=".")
+        ax.plot(
+            positions[i, :, 0], positions[i, :, 1], color=colors[i], marker="."
+        )
 
         # ax.scatter(
         #     positions[i, :, 0],
@@ -367,7 +391,9 @@ def plot_2D_trajectory(
         # )
     ax.add_patch(plt.Circle(goal, 0.5, color="green"))
     for obs in obstacles:
-        ax.add_patch(plt.Rectangle((obs.x, obs.y), obs.width, obs.height, color="red"))
+        ax.add_patch(
+            plt.Rectangle((obs.x, obs.y), obs.width, obs.height, color="red")
+        )
     ax.set(title=title, xlabel="x", ylabel="y")
     # fig.show()
 
@@ -426,7 +452,12 @@ def plot_3D_trajectory(
 def plot_loss(loss: List[float], output: Optional[str] = None):
     fig, ax = plt.subplots(1, 1, dpi=300)
     ax.plot(loss)
-    ax.set(title="Loss function evolution", xlabel="step", ylabel="Loss", yscale="log")
+    ax.set(
+        title="Loss function evolution",
+        xlabel="step",
+        ylabel="Loss",
+        yscale="log",
+    )
     if output is not None:
         fig.savefig(output)
         plt.close(fig)
@@ -437,7 +468,9 @@ def plot_loss(loss: List[float], output: Optional[str] = None):
 if __name__ == "__main__":
     from pathlib import Path
 
-    dirpath = Path("/home/rcremese/projects/snake-ai/simulations").resolve(strict=True)
+    dirpath = Path("/home/rcremese/projects/snake-ai/simulations").resolve(
+        strict=True
+    )
     filepath = dirpath.joinpath(
         "Slot(20,20)_pixel_Tmax=800.0_D=1", "seed_10", "field.npz"
     )
@@ -448,7 +481,9 @@ if __name__ == "__main__":
     fig, _, _ = plot_concentration_map(field, obj["upper"], force_field)
 
     positions = np.array([(x, y) for x in range(20) for y in range(20)])
-    sampled_field = np.array([force_field[:, x * 10, y * 10] for x, y in positions])
+    sampled_field = np.array(
+        [force_field[:, x * 10, y * 10] for x, y in positions]
+    )
     plot_walkers(
         positions,
         field,

@@ -15,8 +15,10 @@ import plotly.graph_objects as go
 import scipy.spatial as sp
 import skimage as ski  # Library for marching cubes
 
-from snake_ai.diffsim.diffusion import get_laplacian_matrix_from_obstacle_binary_map
-import snake_ai.utils.visualization as vis
+from synthetic_2d.diffsim.diffusion import (
+    get_laplacian_matrix_from_obstacle_binary_map,
+)
+import synthetic_2d.utils.visualization as vis
 import scipy.sparse.linalg as spl
 from monai.data.meta_tensor import MetaTensor
 import logging
@@ -54,7 +56,9 @@ def animate_volume(data: MetaTensor, dim=-1):
         ax[0].set_title(f"Frame {frame}")
         return ax
 
-    anim = animation.FuncAnimation(fig, update, frames=range(frames), interval=100)
+    anim = animation.FuncAnimation(
+        fig, update, frames=range(frames), interval=100
+    )
     return anim
 
 
@@ -71,7 +75,11 @@ def create_repulsive_field(binary_seg: MetaTensor, max_dist: float):
     for x, y, z in indices:
         repulsive_field[x, y, z] = (
             0.5
-            * ((max_dist - distances[x, y, z]) / (max_dist * distances[x, y, z])) ** 2
+            * (
+                (max_dist - distances[x, y, z])
+                / (max_dist * distances[x, y, z])
+            )
+            ** 2
         )
     return repulsive_field
 
@@ -81,7 +89,9 @@ def create_attractive_field(binary_seg: MetaTensor, position: np.ndarray):
     assert position.shape == (3,)
     shape = binary_seg.shape
     meshgrid = np.mgrid[0 : shape[0], 0 : shape[1], 0 : shape[2]]
-    attractive_field = np.linalg.norm(meshgrid - position.reshape(-1, 1, 1, 1), axis=0)
+    attractive_field = np.linalg.norm(
+        meshgrid - position.reshape(-1, 1, 1, 1), axis=0
+    )
     return np.where(binary_seg > 0, 0.5 * attractive_field**2, 0)
 
 
@@ -124,7 +134,11 @@ def generate_interactive_3D_surface(data: MetaTensor):
 
     def click_callback(trace, points, state):
         # Get the coordinates of the clicked point
-        x, y, z = points.point_inds[0], points.point_inds[1], points.point_inds[2]
+        x, y, z = (
+            points.point_inds[0],
+            points.point_inds[1],
+            points.point_inds[2],
+        )
 
         # Add the clicked point to the scatter trace
         scatter_trace.x = scatter_trace.x + [x]
@@ -328,7 +342,9 @@ def main():
     logging.debug(f"New shape : {resized_data.shape}")
     logging.info("Plotting volumes")
     # anim1 = animate_volume(resized_data.squeeze())
-    repulsive_field = create_repulsive_field(resized_data.squeeze(), max_dist=5.0)
+    repulsive_field = create_repulsive_field(
+        resized_data.squeeze(), max_dist=5.0
+    )
     attractive_field = create_attractive_field(
         resized_data.squeeze(), np.array([65, 27, 230])
     )
@@ -341,11 +357,13 @@ def main():
     # plt.show()
 
     ## Create a potential field and a simulation
-    from snake_ai.diffsim.field import ScalarField
-    from snake_ai.diffsim.walk_simulation import WalkerSimulationStoch3D
-    from snake_ai.envs.geometry import Cube
+    from synthetic_2d.diffsim.field import ScalarField
+    from synthetic_2d.diffsim.walk_simulation import WalkerSimulationStoch3D
+    from synthetic_2d.envs.geometry import Cube
     import taichi as ti
-    from snake_ai.diffsim.finite_difference import create_laplacian_matrix_3d
+    from synthetic_2d.diffsim.finite_difference import (
+        create_laplacian_matrix_3d,
+    )
 
     # ti.init(arch=ti.gpu)
     # logging.info("Creating potential field")

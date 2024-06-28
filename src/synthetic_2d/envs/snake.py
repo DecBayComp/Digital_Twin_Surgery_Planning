@@ -7,18 +7,20 @@
 import logging
 import pygame
 from typing import List, Dict, Tuple
-from snake_ai.envs.geometry import Rectangle
-from snake_ai.utils.direction import (
+from synthetic_2d.envs.geometry import Rectangle
+from synthetic_2d.utils.direction import (
     Direction,
     get_opposite_direction,
     get_direction_from_vector,
 )
-from snake_ai.envs.agent import Agent
-from snake_ai.utils import Colors, errors
+from synthetic_2d.envs.agent import Agent
+from synthetic_2d.utils import Colors, errors
 import numpy as np
 
 
-def get_direction_from_positions(head: Rectangle, neck: Rectangle) -> Direction:
+def get_direction_from_positions(
+    head: Rectangle, neck: Rectangle
+) -> Direction:
     """Get the direction from the neck to the head using the vector difference (head - neck).
 
     Args:
@@ -31,7 +33,10 @@ def get_direction_from_positions(head: Rectangle, neck: Rectangle) -> Direction:
     assert (head.width == neck.width) and (
         head.height == neck.height
     ), f"The 2 arguments head {head} and neck {neck} need to have the same width and height."
-    disp_vect = ((head.x - neck.x) // head.width, (head.y - neck.y) // head.height)
+    disp_vect = (
+        (head.x - neck.x) // head.width,
+        (head.y - neck.y) // head.height,
+    )
     return get_direction_from_vector(disp_vect)
 
 
@@ -51,7 +56,9 @@ def check_snake_positions(positions: List[Tuple[int]]):
     vector_positions = np.array(
         positions
     )  # Make sure the displacement vector between 2 positions has L1 norm equal to 1
-    diff = np.linalg.norm(vector_positions[:-1] - vector_positions[1:], ord=1, axis=1)
+    diff = np.linalg.norm(
+        vector_positions[:-1] - vector_positions[1:], ord=1, axis=1
+    )
     if not np.array_equal(diff, np.ones(len(positions) - 1)):
         raise errors.ConfigurationError(
             f"The given positions does not form a continuous path."
@@ -70,7 +77,9 @@ class Snake(Agent):
         self.body: List[Rectangle] = []
         for x, y in positions[1:]:
             self.body.append(
-                Rectangle(x * self.pixel, y * self.pixel, self.pixel, self.pixel)
+                Rectangle(
+                    x * self.pixel, y * self.pixel, self.pixel, self.pixel
+                )
             )
         # Make one last check on position configuration.
         if self.collide_with_itself():
@@ -131,7 +140,12 @@ class Snake(Agent):
             raise errors.InvalidAction(
                 f"Action need to be an integer in the range [0,2]. Get {action}."
             )
-        clock_wise = [Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST]
+        clock_wise = [
+            Direction.NORTH,
+            Direction.EAST,
+            Direction.SOUTH,
+            Direction.WEST,
+        ]
         idx = clock_wise.index(self.direction)
         if action == 0:
             next_idx = (idx - 1) % 4

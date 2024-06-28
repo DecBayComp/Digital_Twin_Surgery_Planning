@@ -12,9 +12,9 @@ import numpy as np
 import logging
 from typing import Dict, List, Tuple
 from collections import OrderedDict
-from snake_ai.envs.snake_base_env import SnakeBaseEnv
-from snake_ai.utils.line import Line
-from snake_ai.utils import Direction
+from synthetic_2d.envs.snake_base_env import SnakeBaseEnv
+from synthetic_2d.utils.line import Line
+from synthetic_2d.utils import Direction
 
 
 class RelativePositionWrapper(gym.Wrapper):
@@ -28,7 +28,9 @@ class RelativePositionWrapper(gym.Wrapper):
             self.observation_space = gym.spaces.Dict(
                 {
                     "observation": gym.spaces.Box(
-                        low=-obs_limits, high=obs_limits, shape=(self.env._nb_obs, 2)
+                        low=-obs_limits,
+                        high=obs_limits,
+                        shape=(self.env._nb_obs, 2),
                     ),  # point cloud in local frame                "achieved_goal" : gym.spaces.Box(low=(0,0), high=self.window_size, shape=(2,0), dtype=int), # snake head position
                     "achieved_goal": gym.spaces.Box(
                         low=np.zeros(2),

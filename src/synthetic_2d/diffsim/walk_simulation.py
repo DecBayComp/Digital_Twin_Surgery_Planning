@@ -2,10 +2,14 @@ import taichi as ti
 import taichi.math as tm
 import numpy as np
 
-from snake_ai.envs.geometry import Rectangle, Cube
-from snake_ai.diffsim.field import ScalarField, VectorField, spatial_gradient
-from snake_ai.diffsim.boxes import Box2D, convert_rectangles, convert_cubes
-from snake_ai.diffsim.maths import lerp
+from synthetic_2d.envs.geometry import Rectangle, Cube
+from synthetic_2d.diffsim.field import (
+    ScalarField,
+    VectorField,
+    spatial_gradient,
+)
+from synthetic_2d.diffsim.boxes import Box2D, convert_rectangles, convert_cubes
+from synthetic_2d.diffsim.maths import lerp
 
 from abc import ABC, abstractmethod
 from typing import Dict, List, Tuple, Union, Optional
@@ -47,7 +51,9 @@ class WalkerSimulation(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def optimize(self, target_pos: np.ndarray, max_iter: int = 1000, lr: float = 1e-3):
+    def optimize(
+        self, target_pos: np.ndarray, max_iter: int = 1000, lr: float = 1e-3
+    ):
         raise NotImplementedError
 
 
@@ -70,7 +76,9 @@ class WalkerSimulationStoch2D(WalkerSimulation):
         )
         # TODO : allow the user to change positions of the walkers during the simulation
         self.nb_walkers = positions.shape[0]
-        self._init_pos = ti.Vector.field(2, dtype=ti.f32, shape=(self.nb_walkers,))
+        self._init_pos = ti.Vector.field(
+            2, dtype=ti.f32, shape=(self.nb_walkers,)
+        )
         self._init_pos.from_numpy(positions)
 
         ## Initialisation of the force field
@@ -104,7 +112,10 @@ class WalkerSimulationStoch2D(WalkerSimulation):
             shape=(self.nb_walkers, self.nb_steps), needs_grad=True
         )
         self._noise = ti.Vector.field(
-            2, dtype=float, shape=(self.nb_walkers, self.nb_steps), needs_grad=False
+            2,
+            dtype=float,
+            shape=(self.nb_walkers, self.nb_steps),
+            needs_grad=False,
         )
         # Definition of the loss
         self.loss = ti.field(ti.f32, shape=(), needs_grad=True)
@@ -114,7 +125,9 @@ class WalkerSimulationStoch2D(WalkerSimulation):
         for t in range(1, self.nb_steps):
             self.step(t, diffusivity)
 
-    def optimize(self, target_pos: np.ndarray, max_iter: int = 100, lr: float = 1e-3):
+    def optimize(
+        self, target_pos: np.ndarray, max_iter: int = 100, lr: float = 1e-3
+    ):
         assert isinstance(target_pos, np.ndarray) and target_pos.shape == (
             2,
         ), f"Expected target_pos to be a 2D-array. Get {target_pos.shape}"
@@ -205,9 +218,9 @@ class WalkerSimulationStoch2D(WalkerSimulation):
             if (self.states[n, t - 1].pos[i] < self.obstacles[o].min[i]) and (
                 self.states[n, t].pos[i] >= self.obstacles[o].min[i]
             ):
-                toi = (self.obstacles[o].min[i] - self.states[n, t - 1].pos[i]) / (
-                    self.states[n, t].pos[i] - self.states[n, t - 1].pos[i]
-                )
+                toi = (
+                    self.obstacles[o].min[i] - self.states[n, t - 1].pos[i]
+                ) / (self.states[n, t].pos[i] - self.states[n, t - 1].pos[i])
                 self.states[n, t].pos[i] = lerp(
                     self.states[n, t - 1].pos[i], self.states[n, t].pos[i], toi
                 ) - ti.abs(self.obstacles[o].min[i] - self.states[n, t].pos[i])
@@ -217,12 +230,12 @@ class WalkerSimulationStoch2D(WalkerSimulation):
                 # )
                 self.states[n, t].vel[i] = -self.states[n, t].vel[i]
             # Collision on the max border
-            elif (self.states[n, t - 1].pos[i] > self.obstacles[o].max[i]) and (
-                self.states[n, t].pos[i] <= self.obstacles[o].max[i]
-            ):
-                toi = (self.obstacles[o].max[i] - self.states[n, t - 1].pos[i]) / (
-                    self.states[n, t].pos[i] - self.states[n, t - 1].pos[i]
-                )
+            elif (
+                self.states[n, t - 1].pos[i] > self.obstacles[o].max[i]
+            ) and (self.states[n, t].pos[i] <= self.obstacles[o].max[i]):
+                toi = (
+                    self.obstacles[o].max[i] - self.states[n, t - 1].pos[i]
+                ) / (self.states[n, t].pos[i] - self.states[n, t - 1].pos[i])
                 self.states[n, t].pos[i] = lerp(
                     self.states[n, t - 1].pos[i], self.states[n, t].pos[i], toi
                 ) + ti.abs(self.obstacles[o].max[i] - self.states[n, t].pos[i])
@@ -235,7 +248,9 @@ class WalkerSimulationStoch2D(WalkerSimulation):
     @ti.kernel
     def _update_force_field(self, lr: float):
         for i, j in self.force_field._values:
-            self.force_field._values[i, j] -= lr * self.force_field._values.grad[i, j]
+            self.force_field._values[i, j] -= (
+                lr * self.force_field._values.grad[i, j]
+            )
             # if tm.length(self.force_field._values[i, j]) > 1.0:
             #     self.force_field._values[i, j] = self.force_field._values[
             #         i, j
@@ -294,7 +309,9 @@ class WalkerSimulationStoch3D(WalkerSimulation):
             positions.shape
         )
         self.nb_walkers = positions.shape[0]
-        self._init_pos = ti.Vector.field(3, dtype=ti.f32, shape=(self.nb_walkers,))
+        self._init_pos = ti.Vector.field(
+            3, dtype=ti.f32, shape=(self.nb_walkers,)
+        )
         self._init_pos.from_numpy(positions)
 
         ## Initialisation of the force field
@@ -327,7 +344,10 @@ class WalkerSimulationStoch3D(WalkerSimulation):
             shape=(self.nb_walkers, self.nb_steps), needs_grad=True
         )
         self._noise = ti.Vector.field(
-            3, dtype=float, shape=(self.nb_walkers, self.nb_steps), needs_grad=False
+            3,
+            dtype=float,
+            shape=(self.nb_walkers, self.nb_steps),
+            needs_grad=False,
         )
         # Definition of the loss
         self.loss = ti.field(ti.f32, shape=(), needs_grad=True)
@@ -337,7 +357,9 @@ class WalkerSimulationStoch3D(WalkerSimulation):
         for t in range(1, self.nb_steps):
             self.step(t)
 
-    def optimize(self, target_pos: np.ndarray, max_iter: int = 100, lr: float = 1e-3):
+    def optimize(
+        self, target_pos: np.ndarray, max_iter: int = 100, lr: float = 1e-3
+    ):
         assert isinstance(target_pos, np.ndarray) and target_pos.shape == (
             3,
         ), f"Expected target_pos to be a 2D-array. Get {target_pos.shape}"
@@ -424,9 +446,9 @@ class WalkerSimulationStoch3D(WalkerSimulation):
             if (self.states[n, t - 1].pos[i] < self.obstacles[o].min[i]) and (
                 self.states[n, t].pos[i] >= self.obstacles[o].min[i]
             ):
-                toi = (self.obstacles[o].min[i] - self.states[n, t - 1].pos[i]) / (
-                    self.states[n, t].pos[i] - self.states[n, t - 1].pos[i]
-                )
+                toi = (
+                    self.obstacles[o].min[i] - self.states[n, t - 1].pos[i]
+                ) / (self.states[n, t].pos[i] - self.states[n, t - 1].pos[i])
                 self.states[n, t].pos[i] = lerp(
                     self.states[n, t - 1].pos[i], self.states[n, t].pos[i], toi
                 ) - ti.abs(self.obstacles[o].min[i] - self.states[n, t].pos[i])
@@ -436,12 +458,12 @@ class WalkerSimulationStoch3D(WalkerSimulation):
                 # )
                 self.states[n, t].vel[i] = -self.states[n, t].vel[i]
             # Collision on the max border
-            elif (self.states[n, t - 1].pos[i] > self.obstacles[o].max[i]) and (
-                self.states[n, t].pos[i] <= self.obstacles[o].max[i]
-            ):
-                toi = (self.obstacles[o].max[i] - self.states[n, t - 1].pos[i]) / (
-                    self.states[n, t].pos[i] - self.states[n, t - 1].pos[i]
-                )
+            elif (
+                self.states[n, t - 1].pos[i] > self.obstacles[o].max[i]
+            ) and (self.states[n, t].pos[i] <= self.obstacles[o].max[i]):
+                toi = (
+                    self.obstacles[o].max[i] - self.states[n, t - 1].pos[i]
+                ) / (self.states[n, t].pos[i] - self.states[n, t - 1].pos[i])
                 self.states[n, t].pos[i] = lerp(
                     self.states[n, t - 1].pos[i], self.states[n, t].pos[i], toi
                 ) + ti.abs(self.obstacles[o].max[i] - self.states[n, t].pos[i])
@@ -518,18 +540,20 @@ def render(
 if __name__ == "__main__":
     from pathlib import Path
 
-    from snake_ai.utils.io import EnvLoader
-    from snake_ai.envs.converter import (
+    from synthetic_2d.utils.io import EnvLoader
+    from synthetic_2d.envs.converter import (
         convert_free_space_to_point_cloud,
         convert_obstacles_to_physical_space,
         convert_goal_position,
     )
-    from snake_ai.diffsim.field import ScalarField, spatial_gradient, log
-    from snake_ai.diffsim.boxes import Box2D
-    import snake_ai.utils.visualization as vis
+    from synthetic_2d.diffsim.field import ScalarField, spatial_gradient, log
+    from synthetic_2d.diffsim.boxes import Box2D
+    import synthetic_2d.utils.visualization as vis
 
     ti.init(arch=ti.gpu)
-    dirpath = Path("/home/rcremese/projects/snake-ai/simulations").resolve(strict=True)
+    dirpath = Path("/home/rcremese/projects/snake-ai/simulations").resolve(
+        strict=True
+    )
     path = dirpath.joinpath("Slot(20,20)_pixel_Tmax=800.0_D=1", "seed_10")
     loader = EnvLoader(path.joinpath("environment.json"))
     env = loader.load()
@@ -557,7 +581,9 @@ if __name__ == "__main__":
     simulation.reset()
     simulation.run()
 
-    render(simulation, concentration, (500, 500), output_path="./blocked_entry")
+    render(
+        simulation, concentration, (500, 500), output_path="./blocked_entry"
+    )
     # vis.animate_walk_history(
     #     simulation.positions,
     #     log_concentration.values.to_numpy(),
@@ -567,5 +593,8 @@ if __name__ == "__main__":
 
     simulation.optimize(convert_goal_position(env), max_iter=200, lr=1)
     render(
-        simulation, concentration, (500, 500), output_path="./optimized_blocked_entry"
+        simulation,
+        concentration,
+        (500, 500),
+        output_path="./optimized_blocked_entry",
     )

@@ -1,6 +1,6 @@
 import napari
 
-from napari_potential_field_navigation._widget import DiffApfWidget
+from napari_navigation_field._widget import DiffApfWidget
 
 
 def main():

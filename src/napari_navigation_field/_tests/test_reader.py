@@ -1,6 +1,6 @@
 import numpy as np
 
-from napari_potential_field_navigation import napari_get_reader
+from napari_navigation_field import napari_get_reader
 
 
 # tmp_path is a pytest fixture

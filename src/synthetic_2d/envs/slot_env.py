@@ -1,8 +1,8 @@
-from snake_ai.envs.grid_world import GridWorld
-from snake_ai.envs.geometry import Rectangle
-from snake_ai.envs.walker import Walker2D
+from synthetic_2d.envs.grid_world import GridWorld
+from synthetic_2d.envs.geometry import Rectangle
+from synthetic_2d.envs.walker import Walker2D
 from typing import Optional, Tuple, Dict, Any
-from snake_ai.utils import errors
+from synthetic_2d.utils import errors
 import numpy as np
 
 
@@ -24,7 +24,9 @@ class SlotEnv(GridWorld):
         self._obs_center = None
         self._entries = None
 
-    def reset(self, seed: Optional[int] = None) -> Tuple[np.ndarray, Dict[str, Any]]:
+    def reset(
+        self, seed: Optional[int] = None
+    ) -> Tuple[np.ndarray, Dict[str, Any]]:
         super().reset(seed)
         x_obs = self._rng.integers(2, self.width - 2)
         y_obs = self._rng.integers(2, self.height - 2)
@@ -37,7 +39,9 @@ class SlotEnv(GridWorld):
         self._entries = [(x_obs, y_obs - 1), (x_obs, y_obs + 1)]
 
         self._obstacles = [
-            Rectangle(x_obs * self.pixel, y * self.pixel, self.pixel, self.pixel)
+            Rectangle(
+                x_obs * self.pixel, y * self.pixel, self.pixel, self.pixel
+            )
             for y in range(self.height)
             if (y != y_obs - 1) and (y != y_obs + 1)
         ]
@@ -52,7 +56,9 @@ class SlotEnv(GridWorld):
         _, reward, terminated, info = super().step(action)
         if info["truncated"]:
             if self.agent.position.x < self._obs_center[0] * self.pixel:
-                x_goal = self._rng.integers(self._obs_center[0] + 1, self.width)
+                x_goal = self._rng.integers(
+                    self._obs_center[0] + 1, self.width
+                )
             else:
                 x_goal = self._rng.integers(0, self._obs_center[0])
             self.goal = Rectangle(

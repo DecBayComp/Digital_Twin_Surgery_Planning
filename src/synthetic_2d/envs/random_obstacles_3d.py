@@ -1,7 +1,7 @@
 import argparse
-from snake_ai.envs.grid_world_3d import GridWorld3D
-from snake_ai.envs.geometry import Cube
-from snake_ai.utils import errors
+from synthetic_2d.envs.grid_world_3d import GridWorld3D
+from synthetic_2d.envs.geometry import Cube
+from synthetic_2d.utils import errors
 
 import numpy as np
 from typing import List, Tuple, Optional, Dict, Any
@@ -69,7 +69,9 @@ class RandomObstacles3D(GridWorld3D):
     ## Private methods
     def _populate_grid_with_obstacles(self) -> List[Cube]:
         ## Get all available free positions
-        self._free_position_mask[self._agent.x, self._agent.y, self._agent.z] = False
+        self._free_position_mask[
+            self._agent.x, self._agent.y, self._agent.z
+        ] = False
 
         obs_sizes = self._rng.integers(
             1, self._max_obs_size, size=(self._nb_obs, 3), endpoint=True
@@ -100,7 +102,9 @@ class RandomObstacles3D(GridWorld3D):
             ] = False
             obstacles.append(obstacle)
 
-        self._free_position_mask[self._agent.x, self._agent.y, self._agent.z] = True
+        self._free_position_mask[
+            self._agent.x, self._agent.y, self._agent.z
+        ] = True
         return obstacles
 
 

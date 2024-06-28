@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
-from snake_ai.envs.geometry import Rectangle
-from snake_ai.utils import Direction, errors
+from synthetic_2d.envs.geometry import Rectangle
+from synthetic_2d.utils import Direction, errors
 from typing import List, Tuple
 import pygame
 

@@ -15,12 +15,14 @@ import jax.scipy as jsp
 from abc import abstractmethod, ABCMeta
 import logging
 
-from snake_ai.envs import SnakeClassicEnv
-from snake_ai.physim import DiffusionProcess, ConvolutionWindow
+from synthetic_2d.envs import SnakeClassicEnv
+from synthetic_2d.physim import DiffusionProcess, ConvolutionWindow
 
 
 class BaseDiffusionWrapper(gym.Wrapper, metaclass=ABCMeta):
-    def __init__(self, env: SnakeClassicEnv, diffusion_coef: float = 1, seed: int = 0):
+    def __init__(
+        self, env: SnakeClassicEnv, diffusion_coef: float = 1, seed: int = 0
+    ):
         # if not isinstance(env, SnakeClassicEnv):
         #     raise TypeError(f"Supported environment are SnakeClassicEnv, not {type(env)}")
 
@@ -37,7 +39,9 @@ class BaseDiffusionWrapper(gym.Wrapper, metaclass=ABCMeta):
         self._diffusion_coef = diffusion_coef
 
         if not isinstance(seed, int):
-            raise TypeError(f"The seed need to be an integer, not {type(seed)}")
+            raise TypeError(
+                f"The seed need to be an integer, not {type(seed)}"
+            )
         self._seed = seed
         self.env.seed(seed)
 
@@ -64,7 +68,9 @@ class BaseDiffusionWrapper(gym.Wrapper, metaclass=ABCMeta):
                 continue
             window = [*neighbour.topleft, *neighbour.bottomright]
             observation[i] = np.mean(
-                self._diffusive_field[window[0] : window[2], window[1] : window[3]]
+                self._diffusive_field[
+                    window[0] : window[2], window[1] : window[3]
+                ]
             )
         return observation
 

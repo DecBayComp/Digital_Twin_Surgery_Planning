@@ -1,4 +1,4 @@
-from snake_ai.phiflow.simulation import Simulation
+from synthetic_2d.phiflow.simulation import Simulation
 from typing import List, Optional
 import matplotlib
 import matplotlib.pyplot as plt
@@ -51,7 +51,9 @@ def plot_walkers_with_concentration(
     title: str = "Concentration map + walkers",
 ):
     assert isinstance(point_cloud, flow.PointCloud)
-    assert concentration is None or isinstance(concentration, flow.CenteredGrid)
+    assert concentration is None or isinstance(
+        concentration, flow.CenteredGrid
+    )
     assert target is None or isinstance(target, flow.Tensor)
     assert force_field is None or isinstance(force_field, flow.CenteredGrid)
 
@@ -85,7 +87,15 @@ def plot_walkers_with_concentration(
     # Print the target if it exists
     if target is not None:
         tx, ty = target.center.numpy("vector")
-        ax.plot(tx, ty, color="green", marker="x", markersize=10, ls="", label="Target")
+        ax.plot(
+            tx,
+            ty,
+            color="green",
+            marker="x",
+            markersize=10,
+            ls="",
+            label="Target",
+        )
         fig.legend()
 
     # Plot the walkers with appropriate colors
@@ -132,7 +142,12 @@ def animate_walk_history(
 def plot_loss(loss: List[float], output: Optional[str] = None):
     fig, ax = plt.subplots(1, 1, dpi=300)
     ax.plot(loss)
-    ax.set(title="Loss function evolution", xlabel="step", ylabel="Loss", yscale="log")
+    ax.set(
+        title="Loss function evolution",
+        xlabel="step",
+        ylabel="Loss",
+        yscale="log",
+    )
     if output is not None:
         fig.savefig(output)
         plt.close(fig)
@@ -141,23 +156,32 @@ def plot_loss(loss: List[float], output: Optional[str] = None):
 
 
 if __name__ == "__main__":
-    from snake_ai.utils.io import SimulationLoader
+    from synthetic_2d.utils.io import SimulationLoader
     import matplotlib.pyplot as plt
-    from snake_ai.phiflow.autodiff import compute_log_concentration, clip_gradient_norm
+    from synthetic_2d.phiflow.autodiff import (
+        compute_log_concentration,
+        clip_gradient_norm,
+    )
     import time
 
     dirpath = Path("/home/rocremes/projects/snake-ai/simulations")
-    simulation_path = dirpath.joinpath("GridWorld(20,20)_meta_Tmax=400.0_D=1/seed_0")
+    simulation_path = dirpath.joinpath(
+        "GridWorld(20,20)_meta_Tmax=400.0_D=1/seed_0"
+    )
     simulation_path = dirpath.joinpath(
         "RandomObstacles(20,20)_pixel_Tmax=400.0_D=1/seed_0"
     )
-    simulation_path = dirpath.joinpath("Slot(20,20)_pixel_Tmax=400.0_D=1/seed_0")
+    simulation_path = dirpath.joinpath(
+        "Slot(20,20)_pixel_Tmax=400.0_D=1/seed_0"
+    )
 
     loader = SimulationLoader(simulation_path)
     simu = loader.load()
     # concentration = compute_log_concentration(simu.field)
     concentration = simu.field
-    force_field = flow.field.spatial_gradient(concentration, type=flow.CenteredGrid)
+    force_field = flow.field.spatial_gradient(
+        concentration, type=flow.CenteredGrid
+    )
     # Plot the concentration field and the walkers inital state
     pt_cloud = simu.point_cloud
 

@@ -1,5 +1,5 @@
-from snake_ai.envs import GridWorld, RandomObstaclesEnv, EnvConverter
-from snake_ai.diffsim.boxes import convert_rectangles, Box2D
+from synthetic_2d.envs import GridWorld, RandomObstaclesEnv, EnvConverter
+from synthetic_2d.diffsim.boxes import convert_rectangles, Box2D
 
 import taichi as ti
 import taichi.math as tm
@@ -9,7 +9,9 @@ import logging
 
 @ti.data_oriented
 class ArtificialPotentialField:
-    def __init__(self, env: GridWorld, init_pos: np.ndarray, max_range: float) -> None:
+    def __init__(
+        self, env: GridWorld, init_pos: np.ndarray, max_range: float
+    ) -> None:
         assert isinstance(init_pos, np.ndarray)
         assert init_pos.ndim == 2 and init_pos.shape[1] == 2
         assert isinstance(env, GridWorld)
@@ -36,13 +38,17 @@ class ArtificialPotentialField:
             dtype=ti.f32, shape=(self.nb_walker), needs_grad=True
         )  # potential energy
         self.repulsive_field = ti.field(
-            dtype=ti.f32, shape=(self.nb_walker, self.nb_obstacles), needs_grad=True
+            dtype=ti.f32,
+            shape=(self.nb_walker, self.nb_obstacles),
+            needs_grad=True,
         )
         self.total_field = ti.field(
             dtype=ti.f32, shape=(self.nb_walker), needs_grad=True
         )
         # Define the weights associated with it
-        self.atractive_weight = ti.field(dtype=ti.float32, shape=(), needs_grad=True)
+        self.atractive_weight = ti.field(
+            dtype=ti.float32, shape=(), needs_grad=True
+        )
         self.atractive_weight[None] = 1.0
         self.repulsive_weights = ti.field(
             dtype=ti.float32, shape=(self.nb_obstacles), needs_grad=True
@@ -78,7 +84,8 @@ class ArtificialPotentialField:
                 self.repulsive_field[walker, obs] = 0
             else:
                 self.repulsive_field[walker, obs] = (
-                    0.5 * ((self.max_range - dist) / (self.max_range * dist)) ** 2
+                    0.5
+                    * ((self.max_range - dist) / (self.max_range * dist)) ** 2
                 )
 
     @ti.kernel
@@ -93,7 +100,9 @@ class ArtificialPotentialField:
     @staticmethod
     @ti.func
     def distance(position: tm.vec2, obstacle: Box2D) -> float:
-        dist_vector = tm.max(obstacle.min - position, 0, position - obstacle.max)
+        dist_vector = tm.max(
+            obstacle.min - position, 0, position - obstacle.max
+        )
         return tm.length(dist_vector)
 
     def potential_field_evaluation(self):
@@ -125,7 +134,9 @@ class ArtificialPotentialField:
         pixel = 20
         scale_vector = np.array((pixel * env.width, pixel * env.height))
 
-        gui = ti.GUI("Autodiff gravity", scale_vector, background_color=0xFFFFFF)
+        gui = ti.GUI(
+            "Autodiff gravity", scale_vector, background_color=0xFFFFFF
+        )
         self.reset()
         while gui.running:
             self.potential_field_evaluation()
@@ -146,7 +157,9 @@ def example():
     N = 50
     dt = 1e-5
 
-    x = ti.Vector.field(2, dtype=ti.f32, shape=N, needs_grad=True)  # particle positions
+    x = ti.Vector.field(
+        2, dtype=ti.f32, shape=N, needs_grad=True
+    )  # particle positions
     v = ti.Vector.field(2, dtype=ti.f32, shape=N)  # particle velocities
     U = ti.field(dtype=ti.f32, shape=(), needs_grad=True)  # potential energy
 

@@ -9,7 +9,9 @@ def explicit_diffusion(
     diffusivity: float,
     dt: float,
 ) -> flow.field.Field:
-    diffused = concentration + dt * diffusivity * flow.field.laplace(concentration)
+    diffused = concentration + dt * diffusivity * flow.field.laplace(
+        concentration
+    )
     return flow.field.where(obstacle_mask, concentration, diffused)
     # return (1 - obstacle_mask) * flow.diffuse.explicit(
     #     concentration, diffusivity=diffusivity, dt=dt, substeps=2
@@ -43,7 +45,9 @@ def crank_nicolson_diffusion(
     diffusivity: float,
     dt: float,
 ) -> flow.CenteredGrid:
-    midstep = explicit_diffusion(concentration, obstacle_mask, diffusivity, dt / 2)
+    midstep = explicit_diffusion(
+        concentration, obstacle_mask, diffusivity, dt / 2
+    )
     return implicit_diffusion(midstep, obstacle_mask, diffusivity, dt / 2)
     # return (1 - obstacle_mask) * flow.diffuse.implicit(
     #     concentration, diffusivity=diffusivity, dt=dt, order=2
@@ -97,11 +101,17 @@ class DiffusionSolver:
         ), f"Expected obstacle mask and initial field to have the same shape, not {obs_mask.shape} and {field.shape}"
 
         if self.name == "explicit":
-            return explicit_diffusion(field, obs_mask, self.diffusivity, self.dt)
+            return explicit_diffusion(
+                field, obs_mask, self.diffusivity, self.dt
+            )
         elif self.name == "implicit":
-            return implicit_diffusion(field, obs_mask, self.diffusivity, self.dt)
+            return implicit_diffusion(
+                field, obs_mask, self.diffusivity, self.dt
+            )
         elif self.name == "crank_nicolson":
-            return crank_nicolson_diffusion(field, obs_mask, self.diffusivity, self.dt)
+            return crank_nicolson_diffusion(
+                field, obs_mask, self.diffusivity, self.dt
+            )
 
     def solve(
         self, initial_field: flow.CenteredGrid, obs_mask: flow.CenteredGrid
@@ -148,8 +158,11 @@ class DiffusionSolver:
 
 
 if __name__ == "__main__":
-    from snake_ai.envs import MazeGrid
-    from snake_ai.phiflow.converter import DiffusionConverter, ObstacleConverter
+    from synthetic_2d.envs import MazeGrid
+    from synthetic_2d.phiflow.converter import (
+        DiffusionConverter,
+        ObstacleConverter,
+    )
     import matplotlib.pyplot as plt
 
     env = MazeGrid()

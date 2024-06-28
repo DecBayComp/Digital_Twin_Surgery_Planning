@@ -5,8 +5,8 @@
 # @copyright https://mit-license.org/
 #
 
-from snake_ai.envs.snake_classic_env import SnakeClassicEnv
-from snake_ai.wrappers import StochasticDiffusionWrapper
+from synthetic_2d.envs.snake_classic_env import SnakeClassicEnv
+from synthetic_2d.wrappers import StochasticDiffusionWrapper
 import pygame
 import numpy as np
 
@@ -20,7 +20,9 @@ SEED = 0
 
 
 def main():
-    env = SnakeClassicEnv(render_mode="human", width=W, height=H, nb_obstacles=OBS)
+    env = SnakeClassicEnv(
+        render_mode="human", width=W, height=H, nb_obstacles=OBS
+    )
     # env = DeterministicDiffusionWrapper(env, diffusion_coef=COEF, seed=SEED)
     env = StochasticDiffusionWrapper(
         env, diffusion_coef=COEF, nb_part=NB_PART, t_max=T_MAX, seed=SEED

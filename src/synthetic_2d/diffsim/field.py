@@ -2,9 +2,14 @@ import taichi as ti
 import taichi.math as tm
 import numpy as np
 
-from snake_ai.envs.geometry import Rectangle, Cube
-from snake_ai.diffsim.boxes import Box2D, Box3D, convert_cube, convert_rectangle
-from snake_ai.diffsim.maths import lerp
+from synthetic_2d.envs.geometry import Rectangle, Cube
+from synthetic_2d.diffsim.boxes import (
+    Box2D,
+    Box3D,
+    convert_cube,
+    convert_rectangle,
+)
+from synthetic_2d.diffsim.maths import lerp
 
 from typing import Union
 from enum import Enum
@@ -12,7 +17,9 @@ from abc import ABC, abstractmethod
 
 
 @ti.func
-def map_value_to_idx(value: float, x_min: float, x_max: float, step_size: float) -> int:
+def map_value_to_idx(
+    value: float, x_min: float, x_max: float, step_size: float
+) -> int:
     """Map a physical value to the index of the corresponding cell in the field.
 
     Args:
@@ -26,7 +33,9 @@ def map_value_to_idx(value: float, x_min: float, x_max: float, step_size: float)
         If the value is under the lower bound of the field, return -1.
         If the value is greater than the upper bound of the field, return -1.
     """
-    assert step_size > 0, "Expected step_size to be positive. Get {}".format(step_size)
+    assert step_size > 0, "Expected step_size to be positive. Get {}".format(
+        step_size
+    )
     idx = 0
     if value < x_min:
         idx = -1
@@ -68,7 +77,10 @@ class SampledField(ABC):
         toi = tm.vec2([0, 0])
         for i in ti.static(range(2)):
             temp_idx = map_value_to_idx(
-                pos[i], self._bounds.min[i], self._bounds.max[i], self.step_sizes[i]
+                pos[i],
+                self._bounds.min[i],
+                self._bounds.max[i],
+                self.step_sizes[i],
             )
             # Handle extrapolation
             if temp_idx == -1:
@@ -79,9 +91,13 @@ class SampledField(ABC):
                 toi[i] = 1.0
             else:
                 idx[i] = temp_idx
-                toi[i] = pos[i] - self._bounds.min[i] - idx[i] * self.step_sizes[i]
+                toi[i] = (
+                    pos[i] - self._bounds.min[i] - idx[i] * self.step_sizes[i]
+                )
         # Interpolation along x-axis
-        s0 = lerp(self._values[idx], self._values[idx + tm.ivec2([1, 0])], toi[0])
+        s0 = lerp(
+            self._values[idx], self._values[idx + tm.ivec2([1, 0])], toi[0]
+        )
         s1 = lerp(
             self._values[idx + tm.ivec2([0, 1])],
             self._values[idx + tm.ivec2([1, 1])],
@@ -96,7 +112,10 @@ class SampledField(ABC):
         toi = tm.vec3([0, 0, 0])
         for i in ti.static(range(3)):
             temp_idx = map_value_to_idx(
-                pos[i], self._bounds.min[i], self._bounds.max[i], self.step_sizes[i]
+                pos[i],
+                self._bounds.min[i],
+                self._bounds.max[i],
+                self.step_sizes[i],
             )
             # Handle extrapolation
             if temp_idx == -1:
@@ -107,7 +126,9 @@ class SampledField(ABC):
                 toi[i] = 1.0
             else:
                 idx[i] = temp_idx
-                toi[i] = pos[i] - self._bounds.min[i] - idx[i] * self.step_sizes[i]
+                toi[i] = (
+                    pos[i] - self._bounds.min[i] - idx[i] * self.step_sizes[i]
+                )
         # Interpolation along x-axis
         s0 = lerp(
             self._values[idx],
@@ -208,15 +229,21 @@ class ScalarField(SampledField):
         assert (
             values.ndim == 2 or values.ndim == 3
         ), f"Expected sampled field to be 2D or 3D. Get {values.ndim}D"
-        self._values = ti.field(dtype=ti.f32, shape=values.shape, needs_grad=needs_grad)
+        self._values = ti.field(
+            dtype=ti.f32, shape=values.shape, needs_grad=needs_grad
+        )
         self._values.from_numpy(values)
         self.dim = values.ndim
         ## Bounds and step sizes
         if isinstance(bounds, Rectangle):
-            assert self.dim == 2, f"Expected bounds to be {self.dim}D. Get 2D bounds"
+            assert (
+                self.dim == 2
+            ), f"Expected bounds to be {self.dim}D. Get 2D bounds"
             self._bounds = convert_rectangle(bounds)
         elif isinstance(bounds, Cube):
-            assert self.dim == 3, f"Expected bounds to be {self.dim}D. Get 3D bounds"
+            assert (
+                self.dim == 3
+            ), f"Expected bounds to be {self.dim}D. Get 3D bounds"
             self._bounds = convert_cube(bounds)
         else:
             ## Case where bounds is a Box2D or Box3D
@@ -224,7 +251,8 @@ class ScalarField(SampledField):
             # raise TypeError("Expected bounds to be an instance of Rectangle or Cube")
 
         self.step_sizes = [
-            (self._bounds.max[i] - self._bounds.min[i]) / (self._values.shape[i] - 1)
+            (self._bounds.max[i] - self._bounds.min[i])
+            / (self._values.shape[i] - 1)
             for i in range(self.dim)
         ]
 
@@ -253,10 +281,14 @@ class VectorField(SampledField):
 
         ## Bounds and step sizes
         if isinstance(bounds, Rectangle):
-            assert self.dim == 2, f"Expected bounds to be {self.dim}D. Get 2D bounds"
+            assert (
+                self.dim == 2
+            ), f"Expected bounds to be {self.dim}D. Get 2D bounds"
             self._bounds = convert_rectangle(bounds)
         elif isinstance(bounds, Cube):
-            assert self.dim == 3, f"Expected bounds to be {self.dim}D. Get 3D bounds"
+            assert (
+                self.dim == 3
+            ), f"Expected bounds to be {self.dim}D. Get 3D bounds"
             self._bounds = convert_cube(bounds)
         else:
             ## Case where bounds is a Box2D or Box3D
@@ -264,7 +296,8 @@ class VectorField(SampledField):
             # raise TypeError("Expected bounds to be an instance of Rectangle or Cube")
 
         self.step_sizes = [
-            (self._bounds.max[i] - self._bounds.min[i]) / (self._values.shape[i] - 1)
+            (self._bounds.max[i] - self._bounds.min[i])
+            / (self._values.shape[i] - 1)
             for i in range(self.dim)
         ]
 
@@ -289,7 +322,9 @@ class VectorField(SampledField):
     def clip(self, value: float):
         for I in ti.grouped(self._values):
             if tm.length(self._values[I]) > value:
-                self._values[I] = self._values[I] / tm.length(self._values[I]) * value
+                self._values[I] = (
+                    self._values[I] / tm.length(self._values[I]) * value
+                )
 
 
 def spatial_gradient(
@@ -364,9 +399,15 @@ if __name__ == "__main__":
         field.at(tm.vec2([1, 0])),
         field.at(tm.vec2([0, 1])),
     )
-    print(vector_field.at(tm.vec2([0, 0])), vector[:, 50, 50], vector[:, 49, 49])
-    print(vector_field.max, np.max(np.linalg.norm(vector_field._values, axis=-1)))
+    print(
+        vector_field.at(tm.vec2([0, 0])), vector[:, 50, 50], vector[:, 49, 49]
+    )
+    print(
+        vector_field.max, np.max(np.linalg.norm(vector_field._values, axis=-1))
+    )
 
     plt.imshow(values, origin="lower")
-    plt.quiver(vector_field._values[:, :, 0], vector_field._values[:, :, 1], color="k")
+    plt.quiver(
+        vector_field._values[:, :, 0], vector_field._values[:, :, 1], color="k"
+    )
     plt.show()

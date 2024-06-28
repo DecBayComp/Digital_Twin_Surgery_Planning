@@ -15,22 +15,22 @@ import taichi.math as tm
 import scipy.sparse.linalg as splinalg
 import pandas as pd
 
-from napari_potential_field_navigation.fields import (
+from napari_navigation_field.fields import (
     ScalarField3D,
     VectorField3D,
     SimpleVectorField3D,
     DistanceField,
 )
-from napari_potential_field_navigation._a_star import (
+from napari_navigation_field._a_star import (
     astar,
     wavefront_generation,
 )
-from napari_potential_field_navigation._finite_difference import (
+from napari_navigation_field._finite_difference import (
     create_poisson_system,
 )
 
-from napari_potential_field_navigation.geometries import Box3D
-from napari_potential_field_navigation.simulations import (
+from napari_navigation_field.geometries import Box3D
+from napari_navigation_field.simulations import (
     FreeNavigationSimulation,
     DomainNavigationSimulation,
 )

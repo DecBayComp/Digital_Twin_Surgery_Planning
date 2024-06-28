@@ -1,5 +1,5 @@
-from snake_ai.envs.geometry import Cube
-from snake_ai.utils import errors
+from synthetic_2d.envs.geometry import Cube
+from synthetic_2d.utils import errors
 
 import gymnasium as gym
 import taichi as ti
@@ -10,7 +10,9 @@ import argparse
 
 
 class GridWorld3D(gym.Env):
-    def __init__(self, width: int, height: int, depth: int, seed: int = 0) -> None:
+    def __init__(
+        self, width: int, height: int, depth: int, seed: int = 0
+    ) -> None:
         assert (
             width > 0 and height > 0 and depth > 0
         ), "Width, height and depth must be positive integers"
@@ -55,7 +57,9 @@ class GridWorld3D(gym.Env):
 
         center = self.center
 
-        window = ti.ui.Window("Environment representation", window_size, fps_limit=60)
+        window = ti.ui.Window(
+            "Environment representation", window_size, fps_limit=60
+        )
         canvas = window.get_canvas()
         scene = ti.ui.Scene()
         camera = ti.ui.Camera()
@@ -63,17 +67,27 @@ class GridWorld3D(gym.Env):
         camera.lookat(*center)
 
         while window.running:
-            camera.track_user_inputs(window, movement_speed=0.03, hold_key=ti.ui.RMB)
+            camera.track_user_inputs(
+                window, movement_speed=0.03, hold_key=ti.ui.RMB
+            )
             scene.set_camera(camera)
             scene.ambient_light((0.8, 0.8, 0.8))
             scene.point_light(pos=(0.5, 1.5, 1.5), color=(1, 1, 1))
 
             # Draw 3d-lines in the scene
-            scene.lines(goal_vert, indices=goal_ind, color=(0.0, 1.0, 0.0), width=1.0)
-            scene.lines(bound_vert, indices=bound_ind, color=(0.5, 0.5, 0.5), width=5.0)
-            scene.lines(agent_vert, indices=agent_ind, color=(0.0, 0.0, 1.0), width=1.0)
+            scene.lines(
+                goal_vert, indices=goal_ind, color=(0.0, 1.0, 0.0), width=1.0
+            )
+            scene.lines(
+                bound_vert, indices=bound_ind, color=(0.5, 0.5, 0.5), width=5.0
+            )
+            scene.lines(
+                agent_vert, indices=agent_ind, color=(0.0, 0.0, 1.0), width=1.0
+            )
             if self.nb_obstacles > 0:
-                scene.lines(obs_vert, indices=obs_ind, color=(1.0, 0.0, 0.0), width=1.0)
+                scene.lines(
+                    obs_vert, indices=obs_ind, color=(1.0, 0.0, 0.0), width=1.0
+                )
 
             canvas.scene(scene)
             window.show()

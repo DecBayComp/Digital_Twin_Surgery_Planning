@@ -2,7 +2,7 @@ from typing import List
 import taichi as ti
 import numpy as np
 
-from snake_ai.envs import (
+from synthetic_2d.envs import (
     GridWorld,
     GridWorld3D,
     EnvConverter,
@@ -12,18 +12,18 @@ from snake_ai.envs import (
     SlotEnv,
     RoomEscape,
 )
-from snake_ai.diffsim.diffusion import DiffusionSolver, ScalarField
-from snake_ai.utils.io import (
+from synthetic_2d.diffsim.diffusion import DiffusionSolver, ScalarField
+from synthetic_2d.utils.io import (
     EnvLoader,
     FieldLoader,
     FieldWriter,
     EnvWriter,
     EnvWriter3D,
 )
-import snake_ai.utils.visualization as vis
-from snake_ai.diffsim.field import log
-from snake_ai.diffsim.boxes import Box2D
-from snake_ai.diffsim.walk_simulation import (
+import synthetic_2d.utils.visualization as vis
+from synthetic_2d.diffsim.field import log
+from synthetic_2d.diffsim.boxes import Box2D
+from synthetic_2d.diffsim.walk_simulation import (
     WalkerSimulationStoch2D,
     WalkerSimulationStoch3D,
 )
@@ -57,7 +57,10 @@ def setup_logging(loglevel):
     """
     logformat = "[%(asctime)s] %(levelname)s:%(name)s:%(message)s"
     logging.basicConfig(
-        level=loglevel, stream=sys.stdout, format=logformat, datefmt="%Y-%m-%d %H:%M:%S"
+        level=loglevel,
+        stream=sys.stdout,
+        format=logformat,
+        datefmt="%Y-%m-%d %H:%M:%S",
     )
 
 
@@ -80,10 +83,13 @@ def get_env_parser():
         "rand_obs", help="2D environment with randomly sampled obstacles"
     )
     RandomObstaclesEnv.add_arguments(rand_obs_parser)
-    maze_parser = subparser.add_parser("maze", help="2D maze generated with mazelib")
+    maze_parser = subparser.add_parser(
+        "maze", help="2D maze generated with mazelib"
+    )
     MazeGrid.add_arguments(maze_parser)
     slot_parser = subparser.add_parser(
-        "slot", help="2D environment with 2 slot between the agent and the goal"
+        "slot",
+        help="2D environment with 2 slot between the agent and the goal",
     )
     SlotEnv.add_arguments(slot_parser)
     rooms_parser = subparser.add_parser(
@@ -121,7 +127,10 @@ def get_simulation_parser():
         + "If None, the resolution is the same as the environment",
     )
     simulation_parser.add_argument(
-        "--t_max", type=float, default=100.0, help="Maximum time of the simulation"
+        "--t_max",
+        type=float,
+        default=100.0,
+        help="Maximum time of the simulation",
     )
     simulation_parser.add_argument(
         "--dt", type=float, default=1, help="Time step of the simulation"
@@ -158,7 +167,10 @@ def get_simulation_parser():
 def get_environment(args: argparse.Namespace) -> GridWorld:
     if args.name == "grid_world":
         return GridWorld(
-            width=args.width, height=args.height, pixel=args.pixel, seed=args.seed
+            width=args.width,
+            height=args.height,
+            pixel=args.pixel,
+            seed=args.seed,
         )
     if args.name == "rand_obs":
         return RandomObstaclesEnv(
@@ -179,11 +191,17 @@ def get_environment(args: argparse.Namespace) -> GridWorld:
         )
     if args.name == "slot":
         return SlotEnv(
-            width=args.width, height=args.height, pixel=args.pixel, seed=args.seed
+            width=args.width,
+            height=args.height,
+            pixel=args.pixel,
+            seed=args.seed,
         )
     if args.name == "rooms":
         return RoomEscape(
-            width=args.width, height=args.height, pixel=args.pixel, seed=args.seed
+            width=args.width,
+            height=args.height,
+            pixel=args.pixel,
+            seed=args.seed,
         )
     if args.name == "grid_world_3d":
         return GridWorld3D(
@@ -312,7 +330,9 @@ def run(args: List[str]):
             concentration=log_concentration,
             title=f"Simulation of {env.name} with {args.nb_walkers} walkers",
         )
-        fig.savefig(dirpath.joinpath(f"initial_walkers_grid_{res_as_str}.png"), dpi=300)
+        fig.savefig(
+            dirpath.joinpath(f"initial_walkers_grid_{res_as_str}.png"), dpi=300
+        )
         ## TODO : relancer les simus avec de nouveaux walkers
         # fig.savefig(
         #     dirpath.joinpath(f"initial_walkers_{res_as_str}.png"),

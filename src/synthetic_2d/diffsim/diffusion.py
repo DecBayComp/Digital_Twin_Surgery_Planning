@@ -1,6 +1,6 @@
-from snake_ai.envs import GridWorld3D, GridWorld
-from snake_ai.envs.converter import EnvConverter
-from snake_ai.diffsim.field import ScalarField
+from synthetic_2d.envs import GridWorld3D, GridWorld
+from synthetic_2d.envs.converter import EnvConverter
+from synthetic_2d.diffsim.field import ScalarField
 
 import scipy.sparse as sp
 import scipy.sparse.linalg as spl
@@ -19,8 +19,12 @@ def draft():
         N = nx * ny
 
         # Create 1D finite difference matrices for x and y directions (centered differences)
-        Dx = sp.diags([-1, 0, 1], [-1, 0, 1], shape=(nx, nx), format="csr") / (2 * dx)
-        Dy = sp.diags([-1, 0, 1], [-1, 0, 1], shape=(ny, ny), format="csr") / (2 * dy)
+        Dx = sp.diags([-1, 0, 1], [-1, 0, 1], shape=(nx, nx), format="csr") / (
+            2 * dx
+        )
+        Dy = sp.diags([-1, 0, 1], [-1, 0, 1], shape=(ny, ny), format="csr") / (
+            2 * dy
+        )
         # Apply the boundary conditions
         Dx[0, 0] = -1 / dx
         Dx[0, 1] = 1 / dx
@@ -48,16 +52,24 @@ def draft():
             obstacle_map (np.ndarray): binary map where obstacles are 1 and free space is 0
         """
         assert len(resolution) == 2 or len(resolution) == 3
-        Dxx = sp.diags([1, -2, 1], [-1, 0, 1], shape=(resolution[0], resolution[0]))
-        Dyy = sp.diags([1, -2, 1], [-1, 0, 1], shape=(resolution[1], resolution[1]))
+        Dxx = sp.diags(
+            [1, -2, 1], [-1, 0, 1], shape=(resolution[0], resolution[0])
+        )
+        Dyy = sp.diags(
+            [1, -2, 1], [-1, 0, 1], shape=(resolution[1], resolution[1])
+        )
         laplace_2d = sp.kronsum(Dyy, Dxx, format="lil")
         if len(resolution) == 2:
             return laplace_2d
 
-        Dzz = sp.diags([1, -2, 1], [-1, 0, 1], shape=(resolution[2], resolution[2]))
+        Dzz = sp.diags(
+            [1, -2, 1], [-1, 0, 1], shape=(resolution[2], resolution[2])
+        )
         return sp.kronsum(Dzz, laplace_2d, format="lil")
 
-    def get_laplacian(obstacle_map: np.ndarray) -> Tuple[sp.spmatrix, np.ndarray]:
+    def get_laplacian(
+        obstacle_map: np.ndarray,
+    ) -> Tuple[sp.spmatrix, np.ndarray]:
         """Generate the laplacian matrix from an obstacle map
 
         Args:
@@ -106,22 +118,33 @@ def draft():
     plt.show()
 
 
-def get_obstacle_free_laplacian_matrix(*resolution: Tuple[int]) -> sp.lil_matrix:
-    assert len(resolution) in [2, 3], "The resolution must be a tuple of length 2 or 3"
+def get_obstacle_free_laplacian_matrix(
+    *resolution: Tuple[int],
+) -> sp.lil_matrix:
+    assert len(resolution) in [
+        2,
+        3,
+    ], "The resolution must be a tuple of length 2 or 3"
     assert all(
         isinstance(r, int) and r > 0 for r in resolution
     ), "The resolution must be a tuple of positive integers"
     ex = np.ones(resolution[0])
     ey = np.ones(resolution[1])
     sp.eye(resolution[0])
-    Dxx = sp.diags([ex, -2 * ex, ex], [-1, 0, 1], shape=(resolution[0], resolution[0]))
-    Dyy = sp.diags([ey, -2 * ey, ey], [-1, 0, 1], shape=(resolution[1], resolution[1]))
+    Dxx = sp.diags(
+        [ex, -2 * ex, ex], [-1, 0, 1], shape=(resolution[0], resolution[0])
+    )
+    Dyy = sp.diags(
+        [ey, -2 * ey, ey], [-1, 0, 1], shape=(resolution[1], resolution[1])
+    )
     laplace_2d = sp.kronsum(Dyy, Dxx, format="lil")
     if len(resolution) == 2:
         return laplace_2d
 
     ez = np.ones(resolution[2])
-    Dzz = sp.diags([ez, -2 * ez, ez], [-1, 0, 1], shape=(resolution[2], resolution[2]))
+    Dzz = sp.diags(
+        [ez, -2 * ez, ez], [-1, 0, 1], shape=(resolution[2], resolution[2])
+    )
     return sp.kronsum(Dzz, laplace_2d, format="lil")
 
 
@@ -211,7 +234,9 @@ class DiffusionSolver:
 
         source = self.converter.convert_goal_to_binary_map(shape)
         values = self._solver(source.flatten())
-        return ScalarField(values.reshape(self.resolution), self.converter.env.bounds)
+        return ScalarField(
+            values.reshape(self.resolution), self.converter.env.bounds
+        )
 
     ## Properties
     @property
@@ -269,7 +294,11 @@ def animate_volume(
             z = frame
         # z = frame % z_max
         ax.clear()
-        ax.set(xlabel=labels[1], ylabel=labels[2], title=f"{title} - {labels[0]}={z}")
+        ax.set(
+            xlabel=labels[1],
+            ylabel=labels[2],
+            title=f"{title} - {labels[0]}={z}",
+        )
         ax.imshow(concentration[z], cmap="inferno", vmax=vmax, vmin=vmin)
         ax.quiver(
             force[2][z],
@@ -279,7 +308,9 @@ def animate_volume(
             scale=1,
         )
 
-    anim = animation.FuncAnimation(fig, update, frames=range(2 * z_max), interval=200)
+    anim = animation.FuncAnimation(
+        fig, update, frames=range(2 * z_max), interval=200
+    )
     return anim
 
 
@@ -301,7 +332,7 @@ def plot_volume(concentration: np.ndarray):
 
 
 def main():
-    from snake_ai.envs.random_obstacles_3d import RandomObstacles3D
+    from synthetic_2d.envs.random_obstacles_3d import RandomObstacles3D
     import time
 
     row, col, depth = 10, 10, 10
@@ -339,7 +370,9 @@ def main():
     tic = time.perf_counter()
     solution = solver(source.flatten())
     toc = time.perf_counter()
-    print(f"Time to solve the equation with factorisation : {toc - tic:0.5f} seconds")
+    print(
+        f"Time to solve the equation with factorisation : {toc - tic:0.5f} seconds"
+    )
 
     tic = time.perf_counter()
     solution = spl.spsolve(-laplace, source.flatten())

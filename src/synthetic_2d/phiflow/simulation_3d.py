@@ -1,4 +1,4 @@
-from snake_ai.envs.grid_world_3d import GridWorld3D
+from synthetic_2d.envs.grid_world_3d import GridWorld3D
 from phi import flow
 from typing import Optional, Union, Tuple, List
 import scipy.sparse as sp
@@ -19,7 +19,9 @@ class Env3DConverter:
 
         grid = flow.CenteredGrid(
             0,
-            bounds=flow.Box(x=self.env.width, y=self.env.height, z=self.env.depth),
+            bounds=flow.Box(
+                x=self.env.width, y=self.env.height, z=self.env.depth
+            ),
             x=res[0],
             y=res[1],
             z=res[2],
@@ -39,11 +41,15 @@ class Env3DConverter:
         return flow.PointCloud(
             position,
             values=velocity,
-            bounds=flow.Box(x=self.env.width, y=self.env.height, z=self.env.depth),
+            bounds=flow.Box(
+                x=self.env.width, y=self.env.height, z=self.env.depth
+            ),
         )
 
     def convert_source_to_binary_map(
-        self, resolution: Optional[Union[int, Tuple[int]]] = None, shape: str = "sphere"
+        self,
+        resolution: Optional[Union[int, Tuple[int]]] = None,
+        shape: str = "sphere",
     ) -> flow.field.SampledField:
         assert shape.lower() in [
             "sphere",
@@ -54,7 +60,9 @@ class Env3DConverter:
 
         grid = flow.CenteredGrid(
             0,
-            bounds=flow.Box(x=self.env.width, y=self.env.height, z=self.env.depth),
+            bounds=flow.Box(
+                x=self.env.width, y=self.env.height, z=self.env.depth
+            ),
             x=res[0],
             y=res[1],
             z=res[2],
@@ -84,7 +92,9 @@ class Env3DConverter:
 
     def convert_source_to_sphere(self) -> flow.Sphere:
         center = self.env.goal.center
-        min_dist = min(self.env.goal.width, self.env.goal.height, self.env.goal.depth)
+        min_dist = min(
+            self.env.goal.width, self.env.goal.height, self.env.goal.depth
+        )
 
         return flow.Sphere(
             x=center[0],
@@ -94,14 +104,18 @@ class Env3DConverter:
         )
 
     ## Private mlethods
-    def _check_resolution(self, resolution: Union[int, Tuple[int]]) -> Tuple[int]:
+    def _check_resolution(
+        self, resolution: Union[int, Tuple[int]]
+    ) -> Tuple[int]:
         if resolution is None:
             return (self.env.height, self.env.width, self.env.depth)
         elif isinstance(resolution, int):
             assert resolution > 0, "Resolution must be a positive integer"
             return (resolution, resolution, resolution)
         elif isinstance(resolution, tuple):
-            assert len(resolution) == 3, "Resolution must be a tuple of length 3"
+            assert (
+                len(resolution) == 3
+            ), "Resolution must be a tuple of length 3"
             assert all(
                 isinstance(res, int) and res > 0 for res in resolution
             ), f"Resolution must be a tuple of positive integers. Get {resolution}"
@@ -113,10 +127,14 @@ class Env3DConverter:
 
 
 def solve_diffusion(
-    source: flow.CenteredGrid, obstacle_mask: flow.CenteredGrid, max_iter: int = 1000
+    source: flow.CenteredGrid,
+    obstacle_mask: flow.CenteredGrid,
+    max_iter: int = 1000,
 ) -> flow.CenteredGrid:
     @flow.math.jit_compile_linear
-    def forward(concentration: flow.CenteredGrid, obstacle_mask: flow.CenteredGrid):
+    def forward(
+        concentration: flow.CenteredGrid, obstacle_mask: flow.CenteredGrid
+    ):
         return flow.field.where(
             obstacle_mask, concentration, -flow.field.laplace(concentration)
         )
@@ -140,7 +158,9 @@ class DiffusionSolver:
         converter = Env3DConverter(self.env)
 
         obstacle_mask = converter.convert_obstacles_to_binary_map(resolution)
-        source = converter.convert_source_to_binary_map(resolution, shape="box")
+        source = converter.convert_source_to_binary_map(
+            resolution, shape="box"
+        )
 
         laplace = DiffusionSolver.get_laplace_matrix(
             obstacle_mask.values.numpy("x,y,z")
@@ -198,7 +218,7 @@ class DiffusionSolver:
 
 
 if __name__ == "__main__":
-    from snake_ai.envs.random_obstacles_3d import RandomObstacles3D
+    from synthetic_2d.envs.random_obstacles_3d import RandomObstacles3D
     import matplotlib.pyplot as plt
 
     env = RandomObstacles3D(10, 10, 10, nb_obs=0, max_size=2)
@@ -208,7 +228,9 @@ if __name__ == "__main__":
     binary_map = converter.convert_obstacles_to_binary_map(10)
     source = converter.convert_source_to_binary_map(10, shape="sphere")
 
-    laplace = DiffusionSolver.get_laplace_matrix(binary_map.values.numpy("x,y,z"))
+    laplace = DiffusionSolver.get_laplace_matrix(
+        binary_map.values.numpy("x,y,z")
+    )
     plt.imshow(laplace.todense())
     solver = DiffusionSolver(env)
     concentration = solver.solve(20)

@@ -1,4 +1,4 @@
-from napari_potential_field_navigation.geometries import Box2D, Box3D
+from napari_navigation_field.geometries import Box2D, Box3D
 
 import taichi as ti
 import taichi.math as tm

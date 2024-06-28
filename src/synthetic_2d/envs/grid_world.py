@@ -6,22 +6,22 @@
 #
 from abc import ABCMeta, abstractmethod
 import argparse
-from snake_ai.envs import Rectangle
-from snake_ai.envs.agent import Agent
-from snake_ai.envs.walker import Walker2D
+from synthetic_2d.envs import Rectangle
+from synthetic_2d.envs.agent import Agent
+from synthetic_2d.envs.walker import Walker2D
 import pygame
 
 import numpy as np
 import gymnasium as gym
 
-from snake_ai.utils.errors import (
+from synthetic_2d.utils.errors import (
     InitialisationError,
     ResolutionError,
     OutOfBoundsError,
     ShapeError,
     ConfigurationError,
 )
-from snake_ai.utils import Colors, Direction, Reward
+from synthetic_2d.utils import Colors, Direction, Reward
 from typing import List, Optional, Tuple, Dict, Any
 
 
@@ -57,7 +57,11 @@ class GridWorld(gym.Env):
                 "Only positive integers are allowed for (width, height, pixel). "
                 + f"Get ({width},{height}, {pixel})"
             )
-        self.width, self.height, self.pixel = int(width), int(height), int(pixel)
+        self.width, self.height, self.pixel = (
+            int(width),
+            int(height),
+            int(pixel),
+        )
         self.window_size = (self.width * self.pixel, self.height * self.pixel)
         self.bounds = Rectangle(0, 0, self.width, self.height)
         self._free_position_mask = np.ones((self.width, self.height))
@@ -88,7 +92,9 @@ class GridWorld(gym.Env):
         self.seed(seed)
 
     ## Public methods
-    def reset(self, seed: Optional[int] = None) -> Tuple[np.ndarray, Dict[str, Any]]:
+    def reset(
+        self, seed: Optional[int] = None
+    ) -> Tuple[np.ndarray, Dict[str, Any]]:
         """Method to reset the environment
 
         Args:
@@ -136,7 +142,10 @@ class GridWorld(gym.Env):
             self.score += 1
             x_goal, y_goal = self._rng.choice(self.free_positions)
             self.goal = Rectangle(
-                x_goal * self.pixel, y_goal * self.pixel, self.pixel, self.pixel
+                x_goal * self.pixel,
+                y_goal * self.pixel,
+                self.pixel,
+                self.pixel,
             )
         elif terminated:
             reward = Reward.COLLISION.value
@@ -165,7 +174,9 @@ class GridWorld(gym.Env):
             # The following line copies our drawings from `canvas` to the visible window
             self._screen.blit(canvas, canvas.get_rect())
             # Draw the text showing the score
-            text = self._font.render(f"Score: {self.score}", True, Colors.WHITE.value)
+            text = self._font.render(
+                f"Score: {self.score}", True, Colors.WHITE.value
+            )
             self._screen.blit(text, [0, 0])
             # update the display
             pygame.display.update()
@@ -209,7 +220,9 @@ class GridWorld(gym.Env):
             seed (int, optional): Seed to use for the RNG. If None, use the previous environment seed, otherwise overwrite its value. Defaults to None.
         """
         if seed is not None:
-            assert isinstance(seed, int), "Only integers are allowed for seeding"
+            assert isinstance(
+                seed, int
+            ), "Only integers are allowed for seeding"
             self._seed = seed
         self._rng = np.random.default_rng(self._seed)
 
@@ -339,7 +352,10 @@ class GridWorld(gym.Env):
             "--height", type=int, default=20, help="Height of the environment"
         )
         parser.add_argument(
-            "--pixel", type=int, default=1, help="Size of a game pixel in pixel unit"
+            "--pixel",
+            type=int,
+            default=1,
+            help="Size of a game pixel in pixel unit",
         )
         parser.add_argument(
             "--seed", type=int, default=0, help="Seed for the simulation PRNG"
@@ -424,7 +440,9 @@ class GridWorld(gym.Env):
             or rect.y + rect.height > self.window_size[1]
         )
 
-    def _collide_with_obstacles(self, rect: Optional[pygame.Rect] = None) -> bool:
+    def _collide_with_obstacles(
+        self, rect: Optional[pygame.Rect] = None
+    ) -> bool:
         """Check wether the input rectangle or the agent collides with obstacles in the environment.
 
         Args:

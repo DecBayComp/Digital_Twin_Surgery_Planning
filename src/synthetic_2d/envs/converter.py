@@ -1,6 +1,6 @@
-from snake_ai.envs import GridWorld, Rectangle
-from snake_ai.envs.geometry import Cube
-from snake_ai.envs.grid_world_3d import GridWorld3D
+from synthetic_2d.envs import GridWorld, Rectangle
+from synthetic_2d.envs.geometry import Cube
+from synthetic_2d.envs.grid_world_3d import GridWorld3D
 
 import numpy as np
 from abc import abstractmethod, ABC
@@ -553,8 +553,8 @@ class Env3DConverter(EnvConverter):
 
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
-    from snake_ai.envs.random_obstacles_3d import RandomObstacles3D
-    from snake_ai.envs.random_obstacles_env import RandomObstaclesEnv
+    from synthetic_2d.envs.random_obstacles_3d import RandomObstacles3D
+    from synthetic_2d.envs.random_obstacles_env import RandomObstaclesEnv
 
     # bounds = (10, 10)
     # obstacles = [Rectangle(0, 0, 1, 1), Rectangle(9, 0, 1, 1), Rectangle(0, 9, 1, 1)]

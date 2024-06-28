@@ -5,7 +5,7 @@ from itertools import product
 from typing import Tuple, Union, List
 import logging
 
-from napari_potential_field_navigation._finite_difference import (
+from napari_navigation_field._finite_difference import (
     create_poisson_system,
 )
 

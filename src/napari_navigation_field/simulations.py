@@ -2,8 +2,8 @@ import taichi as ti
 import taichi.math as tm
 import numpy as np
 
-import napari_potential_field_navigation.geometries as geometries
-from napari_potential_field_navigation.fields import (
+import napari_navigation_field.geometries as geometries
+from napari_navigation_field.fields import (
     VectorField2D,
     VectorField3D,
     DistanceField,
@@ -579,8 +579,8 @@ class ClutteredNavigationSimulation(FreeNavigationSimulation):
 if __name__ == "__main__":
     from pathlib import Path
     import matplotlib.pyplot as plt
-    from napari_potential_field_navigation.fields import ScalarField2D
-    from napari_potential_field_navigation.geometries import Box2D
+    from napari_navigation_field.fields import ScalarField2D
+    from napari_navigation_field.geometries import Box2D
 
     ti.init(arch=ti.cpu)
 

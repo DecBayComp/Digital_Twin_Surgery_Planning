@@ -4,11 +4,11 @@
 # @desc Created on 2023-04-04 11:03:07 am
 # @copyright MIT License
 #
-from snake_ai.envs import GridWorld, Rectangle
+from synthetic_2d.envs import GridWorld, Rectangle
 from phi.jax import flow
 
 from abc import ABCMeta, abstractmethod
-from snake_ai.utils import errors
+from synthetic_2d.utils import errors
 from typing import Optional, Tuple, List, Union
 
 
@@ -16,7 +16,9 @@ def convert_position_to_point(
     position: Rectangle, div_factor: int = 1
 ) -> flow.geom.Point:
     return flow.geom.Point(
-        flow.vec(x=position.centerx // div_factor, y=position.centery // div_factor)
+        flow.vec(
+            x=position.centerx // div_factor, y=position.centery // div_factor
+        )
     )
 
 
@@ -45,7 +47,9 @@ def convert_obstacles_to_geometry(
 class Converter(metaclass=ABCMeta):
     def __init__(self, type: str) -> None:
         if not type.lower() in ["pixel", "meta"]:
-            raise ValueError(f"The type argument must be 'pixel' or 'meta', not {type}")
+            raise ValueError(
+                f"The type argument must be 'pixel' or 'meta', not {type}"
+            )
         self.type = type.lower()
 
     ## Private methods
@@ -84,7 +88,9 @@ class DiffusionConverter(Converter):
             )
 
         bounds = flow.Box(x=env.width, y=env.height)
-        return flow.CenteredGrid(source, bounds=bounds, x=env.width, y=env.height)
+        return flow.CenteredGrid(
+            source, bounds=bounds, x=env.width, y=env.height
+        )
 
 
 class ObstacleConverter(Converter):
@@ -114,19 +120,24 @@ class PointCloudConverter(Converter):
         position = flow.tensor(
             5
             * [
-                flow.vec(x=(env.agent.position.centerx), y=(env.agent.position.centery))
+                flow.vec(
+                    x=(env.agent.position.centerx),
+                    y=(env.agent.position.centery),
+                )
             ],
             flow.instance("walker"),
         )
         velocity = flow.math.zeros_like(position)
         return flow.PointCloud(
-            position, values=velocity, bounds=flow.Box(x=env.width, y=env.height)
+            position,
+            values=velocity,
+            bounds=flow.Box(x=env.width, y=env.height),
         )
 
 
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
-    from snake_ai.envs import MazeGrid, RandomObstaclesEnv, RoomEscape
+    from synthetic_2d.envs import MazeGrid, RandomObstaclesEnv, RoomEscape
 
     # env = RandomObstaclesEnv(nb_obs=10)
     env = RoomEscape()

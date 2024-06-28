@@ -7,14 +7,14 @@
 from abc import ABC, abstractmethod
 
 # from snake_ai.physim import DiffusionSolver2D
-from snake_ai.phiflow.solver import DiffusionSolver
-from snake_ai.phiflow.converter import (
+from synthetic_2d.phiflow.solver import DiffusionSolver
+from synthetic_2d.phiflow.converter import (
     DiffusionConverter,
     PointCloudConverter,
     ObstacleConverter,
 )
-from snake_ai.envs import GridWorld
-from snake_ai.utils import errors
+from synthetic_2d.envs import GridWorld
+from synthetic_2d.utils import errors
 from typing import Union, Optional, List, Any, Dict
 from phi.jax import flow
 from enum import Enum
@@ -62,7 +62,9 @@ class Simulation(ABC):
         self.res = res.lower()
         # Set the initial value of the field
         if init_value <= 0:
-            raise ValueError(f"The initial value need to be > 0. Get {init_value}")
+            raise ValueError(
+                f"The initial value need to be > 0. Get {init_value}"
+            )
         self._init_value = init_value
         # Set the maximum simulation time
         if (t_max is not None) and (t_max <= 0):
@@ -178,7 +180,9 @@ class DiffusionSimulation(Simulation):
         if self.t_max is None:
             # Stop condition based on the diffusion time needed to diffuse in a free environment
             self.t_max = (
-                TimeFactor[self.env.__class__.__name__].value * area / diffusivity
+                TimeFactor[self.env.__class__.__name__].value
+                * area
+                / diffusivity
             )
         # Set the time step of the scheme, considering the resolution to be 1 in each environment
         if self.dt is None:
@@ -207,7 +211,9 @@ class DiffusionSimulation(Simulation):
     def reset(self, seed: Optional[int] = None):
         super().reset(seed)
         self._field = (
-            self._init_value * (1 - self.obstacles) * self._field_converter(self.env)
+            self._init_value
+            * (1 - self.obstacles)
+            * self._field_converter(self.env)
         )
 
     @property
@@ -225,7 +231,7 @@ class DiffusionSimulation(Simulation):
 
 
 if __name__ == "__main__":
-    from snake_ai.envs import MazeGrid, RandomObstaclesEnv
+    from synthetic_2d.envs import MazeGrid, RandomObstaclesEnv
     import matplotlib.pyplot as plt
 
     env = RandomObstaclesEnv(nb_obs=10, max_obs_size=3)

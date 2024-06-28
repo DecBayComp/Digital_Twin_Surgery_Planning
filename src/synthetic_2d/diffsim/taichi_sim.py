@@ -89,7 +89,9 @@ class DifferentiableSimulation:
             shape=(self.nb_particles, self.nb_steps), needs_grad=True
         )
         # Stochasticity
-        noise = np.random.randn(self.nb_particles, self.nb_steps, 2).astype(np.float32)
+        noise = np.random.randn(self.nb_particles, self.nb_steps, 2).astype(
+            np.float32
+        )
         self.diffusivity = diffusivity
         self._noise = ti.Vector.field(
             2, dtype=ti.f32, shape=(self.nb_particles, self.nb_steps)
@@ -130,7 +132,8 @@ class DifferentiableSimulation:
                 self._states[n, t].pos = (
                     self._states[n, t - 1].pos
                     + self.dt * self.force_field[i, j]
-                    + tm.sqrt(2 * self.dt * self.diffusivity) * self._noise[n, t]
+                    + tm.sqrt(2 * self.dt * self.diffusivity)
+                    * self._noise[n, t]
                 )
             # self._states[n, t].vel = (
             #     self._states[n, t - 1].vel + self.dt * self.force_field[i, j]
@@ -155,7 +158,9 @@ class DifferentiableSimulation:
             # self._states[n, t].pos = self._states[n, t - 1].pos + self.dt * self.force_field[i,j]
 
     @ti.func
-    def collision(self, position: tm.vec2, velocity: tm.vec2) -> Tuple[tm.vec2]:
+    def collision(
+        self, position: tm.vec2, velocity: tm.vec2
+    ) -> Tuple[tm.vec2]:
         new_pos, new_vel = position, velocity
         if position.x < 0:
             new_pos = tm.vec2(0, position.y)
@@ -213,32 +218,40 @@ class DifferentiableSimulation:
     def obstacle_collision(self, t: int, n: int, o: int):
         for i in ti.static(range(2)):
             # Collision on the min border
-            if (self._states[n, t - 1].pos[i] < self._obstacles[o].min[i]) and (
-                self._states[n, t].pos[i] >= self._obstacles[o].min[i]
-            ):
+            if (
+                self._states[n, t - 1].pos[i] < self._obstacles[o].min[i]
+            ) and (self._states[n, t].pos[i] >= self._obstacles[o].min[i]):
                 # Calculate the time of impact
-                toi = (self._obstacles[o].min[i] - self._states[n, t - 1].pos[i]) / (
-                    self._states[n, t].pos[i] - self._states[n, t - 1].pos[i]
-                )
+                toi = (
+                    self._obstacles[o].min[i] - self._states[n, t - 1].pos[i]
+                ) / (self._states[n, t].pos[i] - self._states[n, t - 1].pos[i])
                 self._states[n, t].pos[i] = lerp(
-                    self._states[n, t - 1].pos[i], self._states[n, t].pos[i], toi
-                ) - ti.abs(self._obstacles[o].min[i] - self._states[n, t].pos[i])
+                    self._states[n, t - 1].pos[i],
+                    self._states[n, t].pos[i],
+                    toi,
+                ) - ti.abs(
+                    self._obstacles[o].min[i] - self._states[n, t].pos[i]
+                )
                 # self._states[n, t].pos[i] = self._obstacles[o].min[i] - ti.abs(
                 #     self._obstacles[o].min[i] - self._states[n, t].pos[i]
                 # )
                 # Reflect velocity
                 self._states[n, t].vel[i] = -self._states[n, t].vel[i]
             # Collision on the max border
-            elif (self._states[n, t - 1].pos[i] > self._obstacles[o].max[i]) and (
-                self._states[n, t].pos[i] <= self._obstacles[o].max[i]
-            ):
+            elif (
+                self._states[n, t - 1].pos[i] > self._obstacles[o].max[i]
+            ) and (self._states[n, t].pos[i] <= self._obstacles[o].max[i]):
                 # Calculate the time of impact
-                toi = (self._obstacles[o].max[i] - self._states[n, t - 1].pos[i]) / (
-                    self._states[n, t].pos[i] - self._states[n, t - 1].pos[i]
-                )
+                toi = (
+                    self._obstacles[o].max[i] - self._states[n, t - 1].pos[i]
+                ) / (self._states[n, t].pos[i] - self._states[n, t - 1].pos[i])
                 self._states[n, t].pos[i] = lerp(
-                    self._states[n, t - 1].pos[i], self._states[n, t].pos[i], toi
-                ) + ti.abs(self._obstacles[o].max[i] - self._states[n, t].pos[i])
+                    self._states[n, t - 1].pos[i],
+                    self._states[n, t].pos[i],
+                    toi,
+                ) + ti.abs(
+                    self._obstacles[o].max[i] - self._states[n, t].pos[i]
+                )
 
                 # self._states[n, t].pos[i] = self._obstacles[o].max[i] + ti.abs(
                 #     self._obstacles[o].max[i] - self._states[n, t].pos[i]
@@ -279,7 +292,9 @@ def render(
     cmap: str = "inferno",
     output_dir: Path = None,
 ):
-    gui = ti.GUI("Differentiable Simulation", (simulation.width, simulation.height))
+    gui = ti.GUI(
+        "Differentiable Simulation", (simulation.width, simulation.height)
+    )
 
     trajectories = simulation.trajectories
 
@@ -308,15 +323,19 @@ def render(
 
 
 def main():
-    from snake_ai.utils.io import SimulationLoader
-    from snake_ai.phiflow import maths
+    from synthetic_2d.utils.io import SimulationLoader
+    from synthetic_2d.phiflow import maths
     from phi import flow
     import time
 
     ti.init(debug=True)
 
-    sim_dir = Path("/home/rcremese/projects/snake-ai/simulations").resolve(strict=True)
-    field_path = sim_dir.joinpath("Slot(20,20)_pixel_Tmax=800.0_D=1", "seed_10")
+    sim_dir = Path("/home/rcremese/projects/snake-ai/simulations").resolve(
+        strict=True
+    )
+    field_path = sim_dir.joinpath(
+        "Slot(20,20)_pixel_Tmax=800.0_D=1", "seed_10"
+    )
     # field_path = sim_dir.joinpath(
     #     "RandomObstacles(20,20)_pixel_Tmax=800.0_D=1", "seed_0"
     # )
@@ -342,15 +361,21 @@ def main():
 
     np_pts_cloud = simu.point_cloud.points.numpy("walker,vector")
     # Declares a field of particles and initialize it with the point cloud positions
-    point_cloud = Particle.field(shape=(np_pts_cloud.shape[0],), needs_grad=True)
+    point_cloud = Particle.field(
+        shape=(np_pts_cloud.shape[0],), needs_grad=True
+    )
     point_cloud.pos.from_numpy(np_pts_cloud * 10)
     # Define objectives and bounds
     bounds = Rectangle(tm.vec2([0.0, 0.0]), width, height)
     target = tm.vec2(simu.env.goal.center)
     # Define the obstacles
     obstacles = Box.field(shape=(len(simu.env.obstacles)), needs_grad=True)
-    obs_min = np.array([obs.topleft for obs in simu.env.obstacles] + [(60, 40)])
-    obs_max = np.array([obs.bottomright for obs in simu.env.obstacles] + [(70, 50)])
+    obs_min = np.array(
+        [obs.topleft for obs in simu.env.obstacles] + [(60, 40)]
+    )
+    obs_max = np.array(
+        [obs.bottomright for obs in simu.env.obstacles] + [(70, 50)]
+    )
     print(obs_min, obs_max)
     obstacles.min.from_numpy(obs_min)
     obstacles.max.from_numpy(obs_max)
@@ -399,8 +424,12 @@ def main():
         scale_units="xy",
         scale=1,
     )
-    plt.scatter(trajectories["pos"][:, 0, 1], trajectories["pos"][:, 0, 0], c="b")
-    plt.scatter(trajectories["pos"][:, -1, 1], trajectories["pos"][:, -1, 0], c="r")
+    plt.scatter(
+        trajectories["pos"][:, 0, 1], trajectories["pos"][:, 0, 0], c="b"
+    )
+    plt.scatter(
+        trajectories["pos"][:, -1, 1], trajectories["pos"][:, -1, 0], c="r"
+    )
     plt.scatter(target[1], target[0], c="k", marker="x")
     plt.show()
 

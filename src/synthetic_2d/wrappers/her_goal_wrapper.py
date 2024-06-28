@@ -1,5 +1,5 @@
-from snake_ai.envs.snake_base_env import SnakeBaseEnv
-from snake_ai.utils import Reward
+from synthetic_2d.envs.snake_base_env import SnakeBaseEnv
+from synthetic_2d.utils import Reward
 
 import gym
 import gym.spaces
@@ -51,7 +51,9 @@ class HerGoalWrapper(gym.Wrapper):
         if np.array_equal(achieved_goal, desired_goal):
             return Reward.FOOD.value
         # check if the head center is outside or collide with an obstacle
-        if any(achieved_goal < [0, 0]) or any(achieved_goal > self.env.window_size):
+        if any(achieved_goal < [0, 0]) or any(
+            achieved_goal > self.env.window_size
+        ):
             return Reward.COLLISION.value
         for obstacle in self.env.obstacles:
             if obstacle.collidepoint(*achieved_goal):

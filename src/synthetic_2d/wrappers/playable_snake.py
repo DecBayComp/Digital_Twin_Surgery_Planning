@@ -1,9 +1,9 @@
 import argparse
 import pygame
 
-from snake_ai.utils import Line
-from snake_ai.envs import SnakeClassicEnv, SnakeHuman
-from snake_ai.utils import Direction
+from synthetic_2d.utils import Line
+from synthetic_2d.envs import SnakeClassicEnv, SnakeHuman
+from synthetic_2d.utils import Direction
 
 import gym
 import numpy as np
@@ -15,7 +15,9 @@ class PlayableSnake(gym.Wrapper):
     def __init__(self, env: SnakeClassicEnv):
         assert isinstance(env, SnakeClassicEnv)
         super().__init__(env)
-        self.observation_space = gym.spaces.Box(low=0, high=env.max_dist, shape=(1,))
+        self.observation_space = gym.spaces.Box(
+            low=0, high=env.max_dist, shape=(1,)
+        )
         self.action_space = gym.spaces.Discrete(4)
 
     def reset(self, **kwargs) -> Tuple[float, dict]:
@@ -24,7 +26,9 @@ class PlayableSnake(gym.Wrapper):
         self.env.snake = SnakeHuman(*snake_head.topleft, self.env._pixel_size)
 
         info = self.env.info
-        obs = np.linalg.norm(Line(info["snake_head"], info["food"]).to_vector())
+        obs = np.linalg.norm(
+            Line(info["snake_head"], info["food"]).to_vector()
+        )
         return obs
 
     def step(self, action: int) -> Tuple[np.array, float, bool, bool, dict]:
@@ -32,7 +36,9 @@ class PlayableSnake(gym.Wrapper):
         _, reward, terminated, info = super().step(action)
 
         info = self.env.info
-        obs = np.linalg.norm(Line(info["snake_head"], info["food"]).to_vector())
+        obs = np.linalg.norm(
+            Line(info["snake_head"], info["food"]).to_vector()
+        )
         return obs, reward, terminated, info
 
     @staticmethod
@@ -73,7 +79,9 @@ def play(width, height, speed, obstacles):
     info = wrapped_env.info
     while True:
         time.sleep(1 / speed)
-        action = PlayableSnake.action_from_direction(wrapped_env.env.snake.direction)
+        action = PlayableSnake.action_from_direction(
+            wrapped_env.env.snake.direction
+        )
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -101,10 +109,18 @@ def play(width, height, speed, obstacles):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-w", "--width", default=20, type=int, help="Width of the canvas in pixels"
+        "-w",
+        "--width",
+        default=20,
+        type=int,
+        help="Width of the canvas in pixels",
     )
     parser.add_argument(
-        "-d", "--height", default=20, type=int, help="Height of the canvas in pixels"
+        "-d",
+        "--height",
+        default=20,
+        type=int,
+        help="Height of the canvas in pixels",
     )
     parser.add_argument(
         "-s",

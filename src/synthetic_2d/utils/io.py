@@ -4,7 +4,7 @@
 # @desc Created on 2023-04-19 12:44:32 pm
 # @copyright MIT License
 #
-from snake_ai.envs import (
+from synthetic_2d.envs import (
     GridWorld,
     GridWorld3D,
     RandomObstaclesEnv,
@@ -14,10 +14,10 @@ from snake_ai.envs import (
     SnakeEnv,
     SlotEnv,
 )
-from snake_ai.phiflow.simulation import Simulation, DiffusionSimulation
-from snake_ai.diffsim.field import ScalarField, VectorField, SampledField
-from snake_ai.diffsim.boxes import Box2D, Box3D
-import snake_ai.phiflow.visualization as vis
+from synthetic_2d.phiflow.simulation import Simulation, DiffusionSimulation
+from synthetic_2d.diffsim.field import ScalarField, VectorField, SampledField
+from synthetic_2d.diffsim.boxes import Box2D, Box3D
+import synthetic_2d.phiflow.visualization as vis
 
 from abc import ABCMeta, abstractmethod
 from typing import Union, Any, Dict
@@ -55,7 +55,9 @@ class EnvWriter(Writer):
             "height": env.height,
             "pixel": env.pixel,
             "seed": env._seed,
-            "render_mode": "None" if env.render_mode is None else env.render_mode,
+            "render_mode": (
+                "None" if env.render_mode is None else env.render_mode
+            ),
         }
         if isinstance(env, RandomObstaclesEnv):
             dictionary["nb_obs"] = env._nb_obs
@@ -271,7 +273,9 @@ class SimulationLoader(Loader):
             dictionary = json.load(file)
         simulation = self.load_from_dict(dictionary)
         simulation.reset()
-        simulation.field = flow.field.read(str(self.path.joinpath("field.npz")))
+        simulation.field = flow.field.read(
+            str(self.path.joinpath("field.npz"))
+        )
         return simulation
 
     @staticmethod

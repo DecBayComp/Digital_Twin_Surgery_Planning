@@ -11,11 +11,11 @@ import time
 
 import taichi as ti
 from matplotlib.animation import FuncAnimation
-from napari_potential_field_navigation.simulations import (
+from napari_navigation_field.simulations import (
     FreeNavigationSimulation,
 )
-from napari_potential_field_navigation.geometries import Box2D
-from napari_potential_field_navigation.fields import VectorField2D
+from napari_navigation_field.geometries import Box2D
+from napari_navigation_field.fields import VectorField2D
 
 
 def setcsrrow2id(matrix: sp.spmatrix, rowind: int):

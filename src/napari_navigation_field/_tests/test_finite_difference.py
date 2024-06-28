@@ -1,4 +1,4 @@
-import napari_potential_field_navigation._finite_difference as fd
+import napari_navigation_field._finite_difference as fd
 import numpy as np
 
 
@@ -29,4 +29,3 @@ def test_poisson_solve_2D():
     dist = np.sqrt((X - 5) ** 2 + (Y - 5) ** 2)
     green_fct = 0.5 * np.log(dist) / np.pi
     assert np.allclose(u, green_fct)
-

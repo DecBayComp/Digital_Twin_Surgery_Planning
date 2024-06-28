@@ -5,9 +5,9 @@
 # @copyright MIT License
 #
 import argparse
-from snake_ai.envs.grid_world import GridWorld
-from snake_ai.envs.walker import Walker2D
-from snake_ai.envs.geometry import Rectangle
+from synthetic_2d.envs.grid_world import GridWorld
+from synthetic_2d.envs.walker import Walker2D
+from synthetic_2d.envs.geometry import Rectangle
 
 from mazelib import Maze
 from mazelib.generate.BacktrackingGenerator import BacktrackingGenerator
@@ -23,7 +23,13 @@ import pygame
 
 
 class MazeGrid(GridWorld):
-    maze_generator = ["prims", "hunt_and_kill", "backtracking", "wilsons", "kruskal"]
+    maze_generator = [
+        "prims",
+        "hunt_and_kill",
+        "backtracking",
+        "wilsons",
+        "kruskal",
+    ]
 
     def __init__(
         self,
@@ -68,7 +74,9 @@ class MazeGrid(GridWorld):
         elif self.maze_generator == "kruskal":
             self._maze.generator = Kruskal(rows, cols)
 
-    def reset(self, seed: Optional[int] = None) -> Tuple[np.ndarray, Dict[str, Any]]:
+    def reset(
+        self, seed: Optional[int] = None
+    ) -> Tuple[np.ndarray, Dict[str, Any]]:
         super().reset(seed)
         self._maze.generate()
         obstacle_mask = np.array(self._maze.grid[1:-1, 1:-1], dtype=bool)
@@ -78,7 +86,9 @@ class MazeGrid(GridWorld):
         self._obstacles = []
         for x, y in obstacle_positions:
             self._obstacles.append(
-                Rectangle(x * self.pixel, y * self.pixel, self.pixel, self.pixel)
+                Rectangle(
+                    x * self.pixel, y * self.pixel, self.pixel, self.pixel
+                )
             )
         # Place food
         corners = [
