@@ -23,9 +23,9 @@ https://napari.org/stable/plugins/index.html
 
 ## Installation
 
-You can install `napari-potential-field-navigation` via [pip]:
+You can install `napari-navigation-field` via [pip]:
 
-    pip install napari-potential-field-navigation
+    pip install napari-navigation-field
 
 
 
